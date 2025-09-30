@@ -1,0 +1,92 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@model ST10174327_GiftOfTheGiversWebApp.Models.IncomingDataModel;
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <div class="container my-5 text-center">
+        <h1 class="display-1 fw-bold text-dark">LATEST STATISTICS</h1>
+        <hr class="border-3 border-dark w-25 mx-auto mb-5" />
+    </div>
+
+    <div class="container">
+        <!-- Goods, Money, Disasters sections here... -->
+    </div>
+}
+else
+{
+    <!-- Public view -->
+    <div class="container my-5">
+        <!-- Blog-style Images -->
+        <div class="row g-4 mb-5">
+            <div class="col-12 col-md-12">
+                <div class="card h-100 shadow-sm border-0">
+                    <img src="~/images/Philosophy.png" class="card-img-top rounded" alt="Philosophy" />
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">Our Philosophy</h5>
+                        <p class="card-text text-muted">
+                            Guided by compassion and resilience, our philosophy is to stand by communities in their most vulnerable moments.
+                            We believe in empowering individuals, providing timely support, and fostering hope where it is needed most.
+                            Our approach combines practical assistance with empathetic engagement,
+                            ensuring that every action contributes to lasting positive impact and strengthens the bonds within the communities we serve.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-12">
+                <div class="card h-100 shadow-sm border-0">
+                    <img src="https://www.goodthingsguy.com/wp-content/uploads/2021/07/mastercard-gift-of-the-givers.jpeg"
+                         class="card-img-top rounded"
+                         alt="About Us" />
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">About Us</h5>
+                        <p class="card-text text-muted">
+                            We are committed to disaster relief and humanitarian aid, empowering people to rebuild their lives with dignity.
+                            Guided by compassion and resilience, we provide timely support, education, and resources to vulnerable communities.
+                            Our dedicated team works tirelessly to restore hope, strengthen communities, and create lasting positive change.
+                        </p>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="row g-4 text-center mb-5">
+            <div class="col-12 col-md-4">
+                <a class="btn btn-lg btn-warning w-100 shadow-sm" style="font-size:1.6rem; border-radius:12px;"
+                   asp-controller="UserDisasters" asp-action="Create">
+                    Log a Disaster
+                </a>
+            </div>
+            <div class="col-12 col-md-4">
+                <a class="btn btn-lg btn-warning w-100 shadow-sm" style="font-size:1.6rem; border-radius:12px;"
+                   asp-controller="UserGoodsDonations" asp-action="Create">
+                    Donate Goods
+                </a>
+            </div>
+            <div class="col-12 col-md-4">
+                <a class="btn btn-lg btn-warning w-100 shadow-sm" style="font-size:1.6rem; border-radius:12px;"
+                   asp-controller="UserMoneyDonations" asp-action="Create">
+                    Donate Money
+                </a>
+            </div>
+        </div>
+
+        <!-- Extra Section: Mission / Impact -->
+        <div class="row">
+            <div class="col-12 text-center">
+                <h3 class="fw-bold mb-3">Our Mission</h3>
+                <p class="lead text-muted mx-auto" style="max-width: 800px;">
+                    Every donation, big or small, makes a real difference. From disaster relief to rebuilding lives,
+                    we are driven by the belief that humanity is strongest when united. Together, we create hope where it is needed most.
+                </p>
+            </div>
+        </div>
+    </div>
+}

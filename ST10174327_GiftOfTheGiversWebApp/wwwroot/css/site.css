@@ -1,0 +1,202 @@
+/* =============================== 
+   GLOBAL STYLES
+================================ */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+a {
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+/* ===============================
+   NAVBAR
+================================ */
+.navbar {
+    background-color: #1F8A70;
+    padding: 0.8rem 1.2rem;
+}
+
+.navbar-brand,
+.navbar-nav .nav-link {
+    color: #FFFFFF !important;
+    font-weight: 600;
+}
+
+    .navbar-nav .nav-link:hover {
+        color: #FFD700 !important; /* gold hover */
+    }
+
+.navbar .btn {
+    background-color: rgb(33, 45, 211);
+    color: #FFFFFF !important;
+    font-weight: 600;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+}
+
+    .navbar .btn:hover {
+        background-color: #1F8A70;
+        color: #FFFFFF !important;
+    }
+
+/* ===============================
+   HEADERS
+================================ */
+h1, h2, h3, h4, h5, h6 {
+    color: #1F8A70;
+    font-weight: 700;
+}
+
+/* ===============================
+   BUTTONS
+================================ */
+.btn {
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: rgb(33, 45, 211);
+    color: #FFFFFF !important;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+    .btn:hover {
+        background-color: #1F8A70;
+        color: #FFFFFF !important;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+
+    .btn:active {
+        background-color: #0F3F30;
+        color: #FFFFFF !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transform: translateY(0);
+    }
+
+/* ===============================
+   FOOTER
+================================ */
+footer {
+    background-color: #145345;
+    color: #FFFFFF;
+    padding: 2rem 0;
+    text-align: center;
+}
+
+    footer h5,
+    footer p,
+    footer a {
+        color: #FFFFFF !important;
+        margin-bottom: 0.5rem;
+    }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+/* ===============================
+   CARDS / CONTENT BLOCKS
+================================ */
+.card {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+}
+
+.card-title {
+    color: #1F8A70;
+    font-weight: 700;
+}
+
+.card-text {
+    color: #333;
+}
+
+/* ===============================
+   UTILITIES
+================================ */
+.text-green {
+    color: #1F8A70 !important;
+}
+
+.bg-green {
+    background-color: #1F8A70 !important;
+    color: #FFFFFF !important;
+}
+
+.text-white {
+    color: #FFFFFF !important;
+}
+
+/* ===============================
+   FORMS / INPUTS
+================================ */
+.form-control {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #FFFFFF; /* white text */
+    background-color: transparent; /* transparent background */
+    background-clip: padding-box;
+    border: 1px solid #1F8A70; /* green border */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 0.25rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+    .form-control:focus {
+        color: #FFFFFF;
+        background-color: rgba(31,138,112,0.1); /* subtle green tint on focus */
+        border-color: #1F8A70;
+        box-shadow: 0 0 0 0.2rem rgba(31,138,112,0.25); /* subtle green glow */
+    }
+
+/* ===============================
+   TABLES
+================================ */
+/* Tables with green borders and white text */
+.table,
+.table-dark,
+.table-green {
+    border: 2px solid #1F8A70; /* outer table border */
+    color: #FFFFFF !important; /* white text */
+    border-collapse: collapse;
+}
+
+    .table th,
+    .table td,
+    .table-dark th,
+    .table-dark td,
+    .table-green th,
+    .table-green td {
+        border: 1px solid #1F8A70; /* green cell borders */
+        color: #FFFFFF !important; /* white text */
+        background-color: #1F8A70; /* preserve existing background */
+        padding: 0.75rem;
+        text-align: left;
+    }
+
+    /* Optional hover effect for all tables */
+    .table tbody tr:hover,
+    .table-dark tbody tr:hover,
+    .table-green tbody tr:hover {
+        background-color: rgba(31,138,112,0.1); /* subtle green hover */
+    }
