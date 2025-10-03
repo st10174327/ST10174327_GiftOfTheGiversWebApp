@@ -6,7 +6,7 @@
 @inject UserManager<IdentityUser> UserManager
 @model ST10174327_GiftOfTheGiversWebApp.Models.IncomingDataModel;
 
-@if (SignInManager.IsSignedIn(User))
+@if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin"))
 {
     <div class="container my-5 text-center">
         <h1 class="display-1 fw-bold text-dark">LATEST STATISTICS</h1>
@@ -19,39 +19,13 @@
 }
 else
 {
-    <!-- Public view -->
+    <!-- Public view for regular users or guests -->
     <div class="container my-5">
         <!-- Blog-style Images -->
         <div class="row g-4 mb-5">
             <div class="col-12 col-md-12">
                 <div class="card h-100 shadow-sm border-0">
                     <img src="~/images/Philosophy.png" class="card-img-top rounded" alt="Philosophy" />
-                    <div class="card-body">
-                        <h5 class="card-title fw-bold">Our Philosophy</h5>
-                        <p class="card-text text-muted">
-                            Guided by compassion and resilience, our philosophy is to stand by communities in their most vulnerable moments.
-                            We believe in empowering individuals, providing timely support, and fostering hope where it is needed most.
-                            Our approach combines practical assistance with empathetic engagement,
-                            ensuring that every action contributes to lasting positive impact and strengthens the bonds within the communities we serve.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-md-12">
-                <div class="card h-100 shadow-sm border-0">
-                    <img src="https://www.goodthingsguy.com/wp-content/uploads/2021/07/mastercard-gift-of-the-givers.jpeg"
-                         class="card-img-top rounded"
-                         alt="About Us" />
-                    <div class="card-body">
-                        <h5 class="card-title fw-bold">About Us</h5>
-                        <p class="card-text text-muted">
-                            We are committed to disaster relief and humanitarian aid, empowering people to rebuild their lives with dignity.
-                            Guided by compassion and resilience, we provide timely support, education, and resources to vulnerable communities.
-                            Our dedicated team works tirelessly to restore hope, strengthen communities, and create lasting positive change.
-                        </p>
-
-                    </div>
                 </div>
             </div>
         </div>

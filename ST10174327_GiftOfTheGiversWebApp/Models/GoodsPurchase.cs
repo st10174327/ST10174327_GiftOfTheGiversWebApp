@@ -1,37 +1,54 @@
-﻿// Import necessary namespaces for data validation and database operations
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-// Define the namespace for the GoodsPurchase model
 namespace ST10174327_GiftOfTheGiversWebApp.Models
 {
-    // Define the GoodsPurchase model
+    /// <summary>
+    /// Represents a purchase of goods, including item count, price, and category.
+    /// </summary>
     public class GoodsPurchase
     {
-        // Define the primary key for the GoodsPurchase model
+        /// <summary>
+        /// Primary key for the GoodsPurchase record.
+        /// </summary>
         [Key]
         public int GoodsPurchaseID { get; set; }
 
-        // Define the price of the item, which is required
+        /// <summary>
+        /// Price per item. Must be greater than or equal to 0.
+        /// </summary>
         [Required]
         [Display(Name = "Item Price")]
+        [Range(0, double.MaxValue, ErrorMessage = "Price must be a positive number.")]
         public decimal GoodsPurchasePrice { get; set; }
 
-        // Define the number of items, which is required and must be greater than or equal to 0
+        /// <summary>
+        /// Number of items purchased. Must be non-negative.
+        /// </summary>
         [Required]
         [Display(Name = "Number of items")]
-        [Range(0, double.MaxValue, ErrorMessage = "The field {0} must be greater than or equal to {1}.")]
+        [Range(0, int.MaxValue, ErrorMessage = "Item count cannot be negative.")]
         public int ITEM_COUNT { get; set; }
 
-        // Define the total price of the goods
-        public decimal GoodsTotalPrice { get; set; }
+        /// <summary>
+        /// Total price of the goods purchase (calculated as GoodsPurchasePrice * ITEM_COUNT).
+        /// </summary>
+        [Display(Name = "Total Price")]
+        public decimal GoodsTotalPrice
+        {
+            get => GoodsPurchasePrice * ITEM_COUNT;
+        }
 
-        // Define the category of the goods, which is optional
+        /// <summary>
+        /// Optional category of the purchased goods.
+        /// </summary>
         [Display(Name = "Category")]
+        [StringLength(100)]
         public string? CATEGORY { get; set; }
 
-        // Define a non-mapped property for the goods inventory ID
-        // This property is not persisted to the database
+        /// <summary>
+        /// Non-mapped property for linking to GoodsInventory.
+        /// </summary>
         [NotMapped]
         public int GOODS_INVENTORY_ID { get; set; }
     }

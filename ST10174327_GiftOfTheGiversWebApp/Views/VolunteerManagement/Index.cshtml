@@ -5,36 +5,52 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
-    <h2>Volunteer List</h2>
-    <p>
-        <a asp-action="Create" class="btn btn-success">Register New Volunteer</a>
-    </p>
+<div class="container-fluid min-vh-100 py-4" style="background-color: #f8f9fa;">
+    <div class="container text-center">
+        <!-- Volunteer Image -->
+        <img src="~/images/Volunteer.png"
+             alt="Volunteer"
+             class="img-fluid mb-3"
+             style="max-height:200px;" />
 
-    <table class="table table-striped table-bordered">
-        <thead class="table-dark">
-            <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone Number</th>
-                <th>Registration Date</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var volunteer in Model)
-            {
-                <tr>
-                    <td>@volunteer.Name</td>
-                    <td>@volunteer.Email</td>
-                    <td>@volunteer.PhoneNumber</td>
-                    <td>@volunteer.RegistrationDate.ToShortDateString()</td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@volunteer.VolunteerID" class="btn btn-sm btn-primary">Edit</a>
-                        <a asp-action="Details" asp-route-id="@volunteer.VolunteerID" class="btn btn-sm btn-info ms-1">Details</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+        <h2 class="mb-3">Volunteer List</h2>
+
+        <p>
+            <a asp-action="Create" class="btn btn-success">Register New Volunteer</a>
+        </p>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered shadow-sm">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone Number</th>
+                        <th>Registration Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var volunteer in Model)
+                    {
+                        <tr>
+                            <td>@volunteer.Name</td>
+                            <td>@volunteer.Email</td>
+                            <td>@volunteer.PhoneNumber</td>
+                            <td>@volunteer.RegistrationDate.ToShortDateString()</td>
+                            <td>
+                                <!-- Show Edit button only if Admin or this is the logged-in user -->
+                                @if (User.IsInRole("Admin") || volunteer.Email == User.Identity.Name)
+                                {
+                                    <a asp-action="Edit" asp-route-id="@volunteer.VolunteerID" class="btn btn-sm btn-primary">Edit</a>
+                                }
+
+                                <a asp-action="Details" asp-route-id="@volunteer.VolunteerID" class="btn btn-sm btn-info ms-1">Details</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>

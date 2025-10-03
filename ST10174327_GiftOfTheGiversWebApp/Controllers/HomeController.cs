@@ -11,17 +11,33 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly SignInManager<IdentityUser> _signInManager;
 
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
+        public HomeController(
+            ILogger<HomeController> logger,
+            ApplicationDbContext context,
+            UserManager<IdentityUser> userManager,
+            SignInManager<IdentityUser> signInManager)
         {
             _logger = logger;
             _context = context;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
+        // Landing page
         public IActionResult Index()
         {
-            if (User.Identity.IsAuthenticated)
+            if (User.Identity != null && User.Identity.IsAuthenticated)
             {
+                // Admin users go to Admin Dashboard
+                if (User.IsInRole("Admin"))
+                {
+                    return RedirectToAction("Dashboard", "Admin");
+                }
+
+                // Regular authenticated users see donations + disasters
                 var viewModel = new IncomingDataModel
                 {
                     GoodsDonations = _context.GoodsDonation.ToList(),
@@ -31,12 +47,22 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
 
                 return View(viewModel);
             }
-            else
-            {
-                return View();
-            }
+
+            // Guests see basic landing page
+            return View();
         }
 
+        // Admin dashboard redirection check
+        public IActionResult AdminRedirect()
+        {
+            if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+            {
+                return RedirectToAction("Dashboard", "Admin");
+            }
+            return RedirectToAction("Index");
+        }
+
+        // Static Pages
         public IActionResult About()
         {
             return View();
@@ -52,6 +78,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             return View();
         }
 
+        // Error Page
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

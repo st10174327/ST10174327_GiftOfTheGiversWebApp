@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ST10174327_GiftOfTheGiversWebApp.Models;
-using ST10174327_GiftOfTheGiversWebApp.Models;
 
 namespace ST10174327_GiftOfTheGiversWebApp.Data
 {
@@ -22,6 +21,8 @@ namespace ST10174327_GiftOfTheGiversWebApp.Data
         public DbSet<GoodsPurchase> GoodsPurchase { get; set; }
         public DbSet<GoodsInventory> GoodsInventory { get; set; }
         public DbSet<Volunteer> Volunteers { get; set; }
+        public DbSet<TaskAssignment> TaskAssignments { get; set; }
+        public DbSet<VolunteerTask> VolunteerTasks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -72,7 +73,5 @@ namespace ST10174327_GiftOfTheGiversWebApp.Data
             // Explicitly fix typo: map to Disaster table
             modelBuilder.Entity<Disaster>().ToTable("Disaster");
         }
-
-
     }
-}
+} 

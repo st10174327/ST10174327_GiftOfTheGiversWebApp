@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using ST10174327_GiftOfTheGiversWebApp.Models;
 using ST10174327_GiftOfTheGiversWebApp.Data;
 
@@ -13,7 +15,6 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
     public class MoneyAllocationsController : Controller
     {
         private readonly ApplicationDbContext _context;
-
         private readonly ILogger<MoneyAllocationsController> _logger;
 
         public MoneyAllocationsController(ApplicationDbContext context, ILogger<MoneyAllocationsController> logger)
@@ -22,156 +23,131 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             _logger = logger;
         }
 
+        // Helper method to populate ViewBags
+        private void PopulateViewBags()
+        {
+            ViewBag.DisasterTypes = _context.Disaster
+                .Where(d => d.IsActive == 1)
+                .Select(d => new SelectListItem
+                {
+                    Value = d.DISASTER_ID.ToString(),
+                    Text = $"{d.DisasterName} - {d.AID_TYPE}"  // FIXED: Changed AidType to AID_TYPE
+                })
+                .ToList();
+
+            var money = _context.Money.FirstOrDefault();
+            ViewBag.RemainingMoney = money?.RemainingMoney ?? 0.0m;
+
+            decimal totalAllocated = _context.MoneyAllocation.Sum(m => (decimal?)m.AllocationAmount) ?? 0.0m;
+            ViewBag.Total = totalAllocated;
+        }
+
+        // List all allocations
         public async Task<IActionResult> Index()
         {
-            var activeDisasters = _context.Disaster
-                .Where(d => d.IsActive == 1)
-                .Select(d => new SelectListItem
-                {
-                    Value = d.DISTATER_ID.ToString(),
-                    Text = d.AID_TYPE
-                })
-                .ToList();
+            PopulateViewBags();
 
-            ViewBag.DisasterTypes = activeDisasters;
+            if (_context.MoneyAllocation == null)
+            {
+                return Problem("Entity set 'ApplicationDbContext.MoneyAllocation' is null.");
+            }
 
-            var money = _context.Money.FirstOrDefault();
-            ViewBag.RemainingMoney = money?.RemainingMoney ?? 0.0m;
+            var allocations = await _context.MoneyAllocation
+                .Include(m => m.Disaster)  // Eager load the Disaster data
+                .OrderByDescending(m => m.AllocationDate)
+                .ToListAsync();
 
-            // Calculate the total amount of money allocated
-            decimal totalAllocated = _context.MoneyAllocation.Sum(m => m.AllocationAmount);
-            ViewBag.Total = totalAllocated;
-
-            return _context.MoneyAllocation != null ?
-                  View(await _context.MoneyAllocation.ToListAsync()) :
-                  Problem("Entity set 'ApplicationDbContext.GoodsDonation' is null.");
+            return View(allocations);
         }
 
+        // Show create form
         public IActionResult Create()
         {
-            var activeDisasters = _context.Disaster
-                .Where(d => d.IsActive == 1)
-                .Select(d => new SelectListItem
-                {
-                    Value = d.DISTATER_ID.ToString(),
-                    Text = d.AID_TYPE
-                })
-                .ToList();
-
-            ViewBag.DisasterTypes = activeDisasters;
-
-            var money = _context.Money.FirstOrDefault();
-            ViewBag.RemainingMoney = money?.RemainingMoney ?? 0.0m;
-
-            // Calculate the total amount of money allocated
-            decimal totalAllocated = _context.MoneyAllocation.Sum(m => m.AllocationAmount);
-            ViewBag.Total = totalAllocated;
-
+            PopulateViewBags();
             return View();
         }
+
+        // Handle POST create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("AllocationAmount, AllocationDate, AidType")] MoneyAllocation moneyAllocation, int DisasterId)
+        public async Task<IActionResult> Create([Bind("AllocationAmount,DISASTER_ID")] MoneyAllocation moneyAllocation)  // FIXED: Changed DisasterId to DISASTER_ID
         {
             var money = _context.Money.FirstOrDefault();
-            decimal totalAllocated;
+
+            if (money == null)
+            {
+                ModelState.AddModelError("", "No money available to allocate.");
+                PopulateViewBags();
+                return View(moneyAllocation);
+            }
 
             if (ModelState.IsValid)
             {
-                if (money != null)
+                if (moneyAllocation.AllocationAmount <= 0 || moneyAllocation.AllocationAmount > money.RemainingMoney)
                 {
-                    if (moneyAllocation.AllocationAmount <= money.RemainingMoney && moneyAllocation.AllocationAmount >= 0)
-                    {
-                        // Set AllocationDate to the current date
-                        moneyAllocation.AllocationDate = DateTime.UtcNow.Date;
-
-                        // Set DisasterId from the parameter
-                        moneyAllocation.DisasterId = DisasterId;
-
-                        // Retrieve the corresponding Disaster entity
-                        var selectedDisaster = _context.Disaster.FirstOrDefault(d => d.DISTATER_ID == DisasterId);
-
-                        if (selectedDisaster != null)
-                        {
-                            // Set the AidType property from the selected Disaster entity
-                            moneyAllocation.AidType = selectedDisaster.AID_TYPE.ToString();
-
-                            // Deduct the allocation amount from remaining money
-                            money.RemainingMoney -= moneyAllocation.AllocationAmount;
-
-                            // Update the total money allocated
-                            totalAllocated = _context.MoneyAllocation.Sum(m => m.AllocationAmount);
-                            ViewBag.Total = totalAllocated;
-
-                            _context.Update(money);
-
-                            // Save the money allocation record to the database
-                            _context.MoneyAllocation.Add(moneyAllocation);
-                            await _context.SaveChangesAsync();
-
-                            // Update the remaining money
-                            ViewBag.RemainingMoney = money.RemainingMoney;
-
-                            return RedirectToAction(nameof(Index));
-                        }
-                        else
-                        {
-                            ModelState.AddModelError("DisasterId", "Selected Disaster not found.");
-                        }
-                    }
-                    else
-                    {
-                        ModelState.AddModelError("AllocationAmount", "Invalid allocation amount or insufficient funds.");
-                    }
+                    ModelState.AddModelError("AllocationAmount", "Invalid allocation amount or insufficient funds.");
                 }
                 else
                 {
-                    ModelState.AddModelError("Error", "Money is null");
-                }
-            }
-            else
-            {
-                // Log model state errors using ILogger
-                if (!ModelState.IsValid)
-                {
-                    foreach (var key in ModelState.Keys)
+                    // Set properties
+                    moneyAllocation.AllocationDate = DateTime.UtcNow.Date;
+
+                    var selectedDisaster = await _context.Disaster
+                        .FirstOrDefaultAsync(d => d.DISASTER_ID == moneyAllocation.DISASTER_ID);  // FIXED: Changed DisasterId to DISASTER_ID
+
+                    if (selectedDisaster != null)
                     {
-                        var modelStateEntry = ModelState[key];
-                        if (modelStateEntry.Errors.Any())
-                        {
-                            foreach (var error in modelStateEntry.Errors)
-                            {
-                                _logger.LogError($"Key: {key}, Error: {error.ErrorMessage}");
-                            }
-                        }
+                        moneyAllocation.AidType = selectedDisaster.AID_TYPE;  // FIXED: Changed AidType to AID_TYPE
+
+                        // Deduct from remaining money
+                        money.RemainingMoney -= moneyAllocation.AllocationAmount;
+                        money.LastUpdated = DateTime.UtcNow;
+                        _context.Update(money);
+
+                        // Save allocation
+                        _context.MoneyAllocation.Add(moneyAllocation);
+                        await _context.SaveChangesAsync();
+
+                        TempData["SuccessMessage"] = "Money allocated successfully!";
+                        return RedirectToAction(nameof(Index));
                     }
+
+                    ModelState.AddModelError("DISASTER_ID", "Selected disaster not found.");  // FIXED: Changed DisasterId to DISASTER_ID
                 }
             }
 
-            // Repopulate the dropdown list and remaining money for the view
-            var disasterTypes = _context.Disaster
-                .Where(d => d.IsActive == 1)
-                .Select(d => new SelectListItem
+            // Log validation errors
+            foreach (var key in ModelState.Keys)
+            {
+                var errors = ModelState[key].Errors;
+                foreach (var error in errors)
                 {
-                    Value = d.DISTATER_ID.ToString(),
-                    Text = d.AID_TYPE
-                })
-                .ToList();
-            ViewBag.DisasterTypes = disasterTypes;
+                    _logger.LogError($"Validation error for {key}: {error.ErrorMessage}");
+                }
+            }
 
-            // Get the current remaining money
-            ViewBag.RemainingMoney = money?.RemainingMoney ?? 0.0m;
-
-            // Calculate the total amount of money allocated
-            totalAllocated = _context.MoneyAllocation.Sum(m => m.AllocationAmount);
-            ViewBag.Total = totalAllocated;
-
+            PopulateViewBags();
             return View(moneyAllocation);
         }
 
+        // Details action
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
 
-   
+            var moneyAllocation = await _context.MoneyAllocation
+                .Include(m => m.Disaster)
+                .FirstOrDefaultAsync(m => m.MoneyAllocationId == id);
 
-       
+            if (moneyAllocation == null)
+            {
+                return NotFound();
+            }
+
+            return View(moneyAllocation);
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<GoodsDonation>
+﻿@model IEnumerable<ST10174327_GiftOfTheGiversWebApp.Models.GoodsDonation>
 
 @{
     ViewData["Title"] = "Goods Donations";
@@ -6,37 +6,58 @@
 }
 
 <div class="container mt-4">
-    <h2>Goods Donations</h2>
+    <h2 class="mb-3">Goods Donations</h2>
+
     <p>
         <a asp-action="Create" class="btn btn-success">Create New Donation</a>
     </p>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>@Html.DisplayNameFor(m => m.DATE)</th>
-                <th>@Html.DisplayNameFor(m => m.ITEM_COUNT)</th>
-                <th>@Html.DisplayNameFor(m => m.CATEGORY)</th>
-                <th>@Html.DisplayNameFor(m => m.DESCRIPTION)</th>
-                <th>@Html.DisplayNameFor(m => m.DONOR)</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
+
+    <p class="text-muted">
+        This page displays all goods donations currently recorded in the system. You can view detailed information, edit existing donations, or remove entries if needed. Accurate tracking ensures that all donations are properly accounted for and managed.
+    </p>
+
+    <div class="table-responsive shadow-sm">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
                 <tr>
-                    <td>@Html.DisplayFor(m => item.DATE)</td>
-                    <td>@Html.DisplayFor(m => item.ITEM_COUNT)</td>
-                    <td>@Html.DisplayFor(m => item.CATEGORY)</td>
-                    <td>@Html.DisplayFor(m => item.DESCRIPTION)</td>
-                    <td>@Html.DisplayFor(m => item.DONOR)</td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.GOODS_DONATION_ID" class="btn btn-sm btn-primary">Edit</a>
-                        <a asp-action="Details" asp-route-id="@item.GOODS_DONATION_ID" class="btn btn-sm btn-info ms-1">Details</a>
-                        <a asp-action="Delete" asp-route-id="@item.GOODS_DONATION_ID" class="btn btn-sm btn-danger ms-1">Delete</a>
-                    </td>
+                    <th>@Html.DisplayNameFor(m => m.DATE)</th>
+                    <th>@Html.DisplayNameFor(m => m.ITEM_COUNT)</th>
+                    <th>@Html.DisplayNameFor(m => m.CATEGORY)</th>
+                    <th>@Html.DisplayNameFor(m => m.DESCRIPTION)</th>
+                    <th>@Html.DisplayNameFor(m => m.DONOR)</th>
+                    <th>Actions</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(m => item.DATE)</td>
+                            <td>@Html.DisplayFor(m => item.ITEM_COUNT)</td>
+                            <td>@Html.DisplayFor(m => item.CATEGORY)</td>
+                            <td>@Html.DisplayFor(m => item.DESCRIPTION)</td>
+                            <td>@Html.DisplayFor(m => item.DONOR)</td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@item.GOODS_DONATION_ID" class="btn btn-sm btn-primary">Edit</a>
+                                <a asp-action="Details" asp-route-id="@item.GOODS_DONATION_ID" class="btn btn-sm btn-info ms-1">Details</a>
+                                <a asp-action="Delete" asp-route-id="@item.GOODS_DONATION_ID" class="btn btn-sm btn-danger ms-1">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No goods donations have been recorded yet.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <p class="text-muted mt-3">
+        Use the action buttons to manage donations responsibly. Proper tracking of donations ensures transparency and accountability in supporting beneficiaries.
+    </p>
 </div>

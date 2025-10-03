@@ -12,7 +12,7 @@
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <form asp-action="Create">
+            <form asp-action="Create" method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                 <input asp-for="USERNAME" type="hidden" value="@UserManager.GetUserName(User)" />
@@ -25,13 +25,18 @@
 
                 <div class="mb-3">
                     <label asp-for="AMOUNT" class="form-label">Amount</label>
-                    <input asp-for="AMOUNT" class="form-control" id="amountInput" />
+                    <input asp-for="AMOUNT" class="form-control" id="amountInput" placeholder="Enter donation amount" />
                     <span asp-validation-for="AMOUNT" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
                     <label asp-for="DONOR" class="form-label">Donor</label><br>
-                    <label><input type="radio" name="DONOR" value="Anonymous"> Anonymous</label>
+                    <label>
+                        <input type="radio" name="DONOR" value="@UserManager.GetUserName(User)" checked> Myself
+                    </label>
+                    <label class="ms-3">
+                        <input type="radio" name="DONOR" value="Anonymous"> Anonymous
+                    </label>
                     <span asp-validation-for="DONOR" class="text-danger"></span>
                 </div>
 
@@ -49,12 +54,17 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
     <script>
         $(document).ready(function () {
             $("#amountInput").on("input", function () {
                 var input = $(this).val();
-                var pattern = /^\d+(\.\d{0,2})?$/; // Allows up to 2 decimals
-                if (!pattern.test(input)) { $(this).val(""); }
+                var pattern = /^\d+(\.\d{0,2})?$/; // up to 2 decimals
+                if (!pattern.test(input)) {
+                    $(this).addClass("is-invalid");
+                } else {
+                    $(this).removeClass("is-invalid");
+                }
             });
         });
     </script>

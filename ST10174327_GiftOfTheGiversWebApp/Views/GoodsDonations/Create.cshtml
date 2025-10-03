@@ -1,4 +1,4 @@
-﻿@model GoodsDonation
+﻿@model ST10174327_GiftOfTheGiversWebApp.Models.GoodsDonation
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
@@ -16,6 +16,7 @@
     <div class="card shadow-sm">
         <div class="card-body">
             <form asp-action="Create" method="post">
+                @* Automatically set username *@
                 <input type="hidden" asp-for="USERNAME" value="@UserManager.GetUserName(User)" />
 
                 <div class="mb-3">
@@ -68,8 +69,8 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Donor</label><br />
-                    <input type="radio" name="DONOR" value="Anonymous" /> Anonymous
+                    <label class="form-label">Donor Type</label><br />
+                    <input type="radio" asp-for="DONOR" value="Anonymous" /> Anonymous
                     <span asp-validation-for="DONOR" class="text-danger"></span>
                 </div>
 
@@ -83,26 +84,29 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function () {
-            var categoryDropdown = $("#CATEGORY");
-            var addBtn = $("#addCategoryButton");
-            var newForm = $("#newCategoryForm");
-            var newName = $("#newCategoryName");
+            const categoryDropdown = $("#CATEGORY");
+            const addBtn = $("#addCategoryButton");
+            const newForm = $("#newCategoryForm");
+            const newName = $("#newCategoryName");
 
-            addBtn.click(function () {
+            // Show new category input
+            addBtn.click(() => {
                 addBtn.prop("disabled", true);
                 categoryDropdown.prop("disabled", true);
                 newForm.show();
             });
 
-            $("#cancelCategoryButton").click(function () {
+            // Cancel adding new category
+            $("#cancelCategoryButton").click(() => {
                 addBtn.prop("disabled", false);
                 categoryDropdown.prop("disabled", false);
                 newForm.hide();
                 newName.val("");
             });
 
-            $("#createCategoryButton").click(function () {
-                var value = newName.val();
+            // Create new category and select it
+            $("#createCategoryButton").click(() => {
+                const value = newName.val().trim();
                 if (value) {
                     categoryDropdown.append(new Option(value, value, true, true));
                     addBtn.prop("disabled", false);

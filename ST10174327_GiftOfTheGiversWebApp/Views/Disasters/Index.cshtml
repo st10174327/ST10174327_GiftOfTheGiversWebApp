@@ -1,4 +1,5 @@
-﻿@model IEnumerable<Disaster>
+﻿@model IEnumerable<ST10174327_GiftOfTheGiversWebApp.Models.Disaster>
+
 <div class="container my-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="display-5 text-primary">Disasters</h1>
@@ -19,20 +20,35 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model)
+                @if (Model.Any())
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr class="align-middle">
+                            <td>@item.USERNAME</td>
+                            <td>@item.STARTDATE.ToString("MMM dd, yyyy")</td>
+                            <td>@item.ENDDATE.ToString("MMM dd, yyyy")</td>
+                            <td>@item.LOCATION</td>
+                            <td>@item.AID_TYPE</td>
+                            <td>
+                                <span class="badge @(item.IsActive != 0 ? "bg-success" : "bg-secondary")">
+                                    @(item.IsActive != 0 ? "Yes" : "No")
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a asp-action="Details" asp-route-id="@item.DISASTER_ID" class="btn btn-info btn-sm">Details</a>
+                                    <a asp-action="Edit" asp-route-id="@item.DISASTER_ID" class="btn btn-success btn-sm">Edit</a>
+                                    <a asp-action="Delete" asp-route-id="@item.DISASTER_ID" class="btn btn-danger btn-sm">Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
                 {
                     <tr>
-                        <td>@item.USERNAME</td>
-                        <td>@item.STARTDATE?.ToShortDateString()</td>
-                        <td>@item.ENDDATE?.ToShortDateString()</td>
-                        <td>@item.LOCATION</td>
-                        <td>@item.AID_TYPE</td>
-                        <td>@(item.IsActive != 0 ? "Yes" : "No")</td>
-                        <td>
-                            <a asp-action="Details" asp-route-id="@item.DISTATER_ID" class="btn btn-info btn-sm me-1">Details</a>
-                            <a asp-action="Edit" asp-route-id="@item.DISTATER_ID" class="btn btn-success btn-sm me-1">Edit</a>
-                            <a asp-action="Delete" asp-route-id="@item.DISTATER_ID" class="btn btn-danger btn-sm">Delete</a>
-                        </td>
+                        <td colspan="7" class="text-center text-muted">No disasters logged yet. Click "Log New Disaster" to add one.</td>
                     </tr>
                 }
             </tbody>

@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using ST10174327_GiftOfTheGiversWebApp.Models;
-using ST10174327_GiftOfTheGiversWebApp;
 using ST10174327_GiftOfTheGiversWebApp.Data;
 using ST10174327_GiftOfTheGiversWebApp.Models;
 
@@ -23,251 +19,174 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         }
 
         // GET: GoodsDonations
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index()
         {
-            try
-            {
-                return _context.GoodsDonation != null ?
-                            View(await _context.GoodsDonation.ToListAsync()) :
-                            Problem("Entity set 'ApplicationDbContext.GoodsDonation'  is null.");
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                Console.WriteLine($"Error in Index: {ex.Message}");
-                return StatusCode(500, "An error occurred while retrieving goods donations.");
-            }
+            var donations = await _context.GoodsDonation.ToListAsync(); // Removed Include(d => d.InventoryItem)
+            return View(donations);
         }
 
         // GET: GoodsDonations/Details/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Details(int? id)
         {
-            try
-            {
-                if (id == null || _context.GoodsDonation == null)
-                {
-                    return NotFound();
-                }
+            if (id == null)
+                return NotFound();
 
-                var goodsDonation = await _context.GoodsDonation
-                    .FirstOrDefaultAsync(m => m.GOODS_DONATION_ID == id);
-                if (goodsDonation == null)
-                {
-                    return NotFound();
-                }
+            var donation = await _context.GoodsDonation
+                .FirstOrDefaultAsync(d => d.GOODS_DONATION_ID == id); // Removed Include(d => d.InventoryItem)
 
-                return View(goodsDonation);
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                Console.WriteLine($"Error in Details: {ex.Message}");
-                return StatusCode(500, "An error occurred while retrieving goods donation details.");
-            }
+            if (donation == null)
+                return NotFound();
+
+            return View(donation);
         }
 
-        // GET: UserGoodsDonations/Create
+        // GET: GoodsDonations/Create
         [Authorize]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            try
-            {
-                // Get the unique categories for the logged-in user, excluding "Cloths" and "Non-Perishable Foods"
-                var existingCategories = _context.GoodsDonation
-                    .Where(d => d.USERNAME == User.Identity.Name && d.CATEGORY != "Cloths" && d.CATEGORY != "Non-Perishable Foods")
-                    .Select(d => d.CATEGORY)
-                    .Distinct()
-                    .ToList();
+            ViewBag.Categories = await _context.GoodsInventory
+                .Select(g => g.CATEGORY)
+                .Distinct()
+                .ToListAsync();
 
-                ViewBag.CategoryList = existingCategories;
-
-                return View();
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                Console.WriteLine($"Error in Create: {ex.Message}");
-                return StatusCode(500, "An error occurred while creating a new goods donation.");
-            }
+            return View();
         }
 
-        // POST: UserGoodsDonations/Create
+        // POST: GoodsDonations/Create
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("GOODS_DONATION_ID, USERNAME, DATE, ITEM_COUNT, CATEGORY, DESCRIPTION, DONOR")] GoodsDonation goodsDonation)
+        public async Task<IActionResult> Create([Bind("ITEM_COUNT, CATEGORY, DESCRIPTION, DONOR, DATE")] GoodsDonation goodsDonation)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (ModelState.IsValid)
-                {
-                    if (goodsDonation.DATE < DateTime.Now.Date)
-                    {
-                        ModelState.AddModelError("DATE", "Date cannot be earlier than today.");
-                        return View(goodsDonation);
-                    }
-
-                    // Check if the user selected "Anonymous" as the donor
-                    if (goodsDonation.DONOR == "Anonymous")
-                    {
-                        goodsDonation.DONOR = "Anonymous";
-                    }
-                    else
-                    {
-                        // Set DONOR to the current logged-in user's username
-                        var currentUser = User.Identity?.Name;
-                        goodsDonation.DONOR = currentUser;
-                    }
-
-                    // Check if the category exists in the GoodsInventory
-                    var inventoryItem = _context.GoodsInventory.FirstOrDefault(g => g.CATEGORY == goodsDonation.CATEGORY);
-
-                    if (inventoryItem != null)
-                    {
-                        // Update the item count in the existing record
-                        inventoryItem.ITEM_COUNT += goodsDonation.ITEM_COUNT;
-                    }
-                    else
-                    {
-                        // Create a new record in the GoodsInventory
-                        _context.GoodsInventory.Add(new GoodsInventory
-                        {
-                            CATEGORY = goodsDonation.CATEGORY, // Corrected the property name
-                            ITEM_COUNT = goodsDonation.ITEM_COUNT
-                        });
-                    }
-
-                    // Check if the category already exists in the user's previous donations
-                    var existingCategories = _context.GoodsDonation
-                        .Where(d => d.USERNAME == goodsDonation.USERNAME && d.CATEGORY != "Cloths" && d.CATEGORY != "Non-Perishable Foods")
-                        .Select(d => d.CATEGORY)
-                        .Distinct()
-                        .ToList();
-
-                    if (!existingCategories.Contains(goodsDonation.CATEGORY))
-                    {
- // Add the new category to the user's previous donations
-                        _context.GoodsDonation.Add(goodsDonation);
-                    }
-                    else
-                    {
-                        // Update the existing record
-                        var existingDonation = _context.GoodsDonation.FirstOrDefault(d => d.USERNAME == goodsDonation.USERNAME && d.CATEGORY == goodsDonation.CATEGORY);
-                        existingDonation.ITEM_COUNT += goodsDonation.ITEM_COUNT;
-                    }
-
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
-                }
-                else
-                {
-                    return View(goodsDonation);
-                }
+                ViewBag.Categories = await _context.GoodsInventory
+                    .Select(g => g.CATEGORY)
+                    .Distinct()
+                    .ToListAsync();
+                return View(goodsDonation);
             }
-            catch (Exception ex)
+
+            // Validate date
+            if (goodsDonation.DATE < DateTime.Now.Date)
             {
-                // Log the exception
-                Console.WriteLine($"Error in Create POST: {ex.Message}");
-                return StatusCode(500, "An error occurred while creating a new goods donation.");
+                ModelState.AddModelError("DATE", "Date cannot be earlier than today.");
+                ViewBag.Categories = await _context.GoodsInventory
+                    .Select(g => g.CATEGORY)
+                    .Distinct()
+                    .ToListAsync();
+                return View(goodsDonation);
             }
+
+            // Set DONOR
+            goodsDonation.DONOR = goodsDonation.DONOR == "Anonymous" ? "Anonymous" : User.Identity?.Name;
+
+            // Update inventory
+            var inventoryItem = await _context.GoodsInventory
+                .FirstOrDefaultAsync(g => g.CATEGORY == goodsDonation.CATEGORY);
+
+            if (inventoryItem != null)
+            {
+                inventoryItem.ITEM_COUNT += goodsDonation.ITEM_COUNT;
+            }
+            else
+            {
+                _context.GoodsInventory.Add(new GoodsInventory
+                {
+                    CATEGORY = goodsDonation.CATEGORY,
+                    ITEM_COUNT = goodsDonation.ITEM_COUNT
+                });
+            }
+
+            // Save donation
+            _context.GoodsDonation.Add(goodsDonation);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Goods donation successfully recorded!";
+            return RedirectToAction(User.IsInRole("Admin") ? "Index" : "Create");
         }
 
         // GET: GoodsDonations/Edit/5
         [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
-            try
-            {
-                if (id == null || _context.GoodsDonation == null)
-                {
-                    return NotFound();
-                }
+            if (id == null)
+                return NotFound();
 
-                var goodsDonation = await _context.GoodsDonation.FindAsync(id);
-                if (goodsDonation == null)
-                {
-                    return NotFound();
-                }
+            var donation = await _context.GoodsDonation.FindAsync(id);
+            if (donation == null)
+                return NotFound();
 
-                return View(goodsDonation);
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                Console.WriteLine($"Error in Edit: {ex.Message}");
-                return StatusCode(500, "An error occurred while editing a goods donation.");
-            }
+            // Only allow owner or admin to edit
+            if (donation.DONOR != User.Identity?.Name && !User.IsInRole("Admin"))
+                return Forbid();
+
+            ViewBag.Categories = await _context.GoodsInventory
+                .Select(g => g.CATEGORY)
+                .Distinct()
+                .ToListAsync();
+
+            return View(donation);
         }
 
         // POST: GoodsDonations/Edit/5
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("GOODS_DONATION_ID, USERNAME, DATE, ITEM_COUNT, CATEGORY, DESCRIPTION, DONOR")] GoodsDonation goodsDonation)
+        public async Task<IActionResult> Edit(int id, [Bind("GOODS_DONATION_ID, ITEM_COUNT, CATEGORY, DESCRIPTION, DONOR, DATE")] GoodsDonation goodsDonation)
         {
-            try
-            {
-                if (id != goodsDonation.GOODS_DONATION_ID)
-                {
-                    return NotFound();
-                }
+            if (id != goodsDonation.GOODS_DONATION_ID)
+                return NotFound();
 
-                if (ModelState.IsValid)
-                {
-                    try
-                    {
-                        _context.Update(goodsDonation);
-                        await _context.SaveChangesAsync();
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        if (!GoodsDonationExists(goodsDonation.GOODS_DONATION_ID))
-                        {
-                            return NotFound();
-                        }
-                        else
-                        {
-                            throw;
-                        }
-                    }
-                    return RedirectToAction(nameof(Index));
-                }
-                return View(goodsDonation);
-            }
-            catch (Exception ex)
+            // Only allow owner or admin
+            if (goodsDonation.DONOR != User.Identity?.Name && !User.IsInRole("Admin"))
+                return Forbid();
+
+            if (ModelState.IsValid)
             {
-                // Log the exception
-                Console.WriteLine($"Error in Edit POST: {ex.Message}");
-                return StatusCode(500, "An error occurred while editing a goods donation.");
+                try
+                {
+                    _context.Update(goodsDonation);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Donation updated successfully!";
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!await _context.GoodsDonation.AnyAsync(e => e.GOODS_DONATION_ID == id))
+                        return NotFound();
+                    throw;
+                }
+                return RedirectToAction(User.IsInRole("Admin") ? "Index" : "Create");
             }
+
+            ViewBag.Categories = await _context.GoodsInventory
+                .Select(g => g.CATEGORY)
+                .Distinct()
+                .ToListAsync();
+
+            return View(goodsDonation);
         }
 
         // GET: GoodsDonations/Delete/5
         [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
-            try
-            {
-                if (id == null || _context.GoodsDonation == null)
-                {
-                    return NotFound();
-                }
+            if (id == null)
+                return NotFound();
 
-                var goodsDonation = await _context.GoodsDonation
-                    .FirstOrDefaultAsync(m => m.GOODS_DONATION_ID == id);
-                if (goodsDonation == null)
-                {
-                    return NotFound();
-                }
+            var donation = await _context.GoodsDonation
+                .FirstOrDefaultAsync(d => d.GOODS_DONATION_ID == id);
 
-                return View(goodsDonation);
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                Console.WriteLine($"Error in Delete: {ex.Message}");
-                return StatusCode(500, "An error occurred while deleting a goods donation.");
-            }
+            if (donation == null)
+                return NotFound();
+
+            // Only allow owner or admin
+            if (donation.DONOR != User.Identity?.Name && !User.IsInRole("Admin"))
+                return Forbid();
+
+            return View(donation);
         }
 
         // POST: GoodsDonations/Delete/5
@@ -276,41 +195,19 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            try
-            {
-                if (_context.GoodsDonation == null)
-                {
-                    return Problem("Entity set 'ApplicationDbContext.GoodsDonation'  is null.");
-                }
-                var goodsDonation = await _context.GoodsDonation.FindAsync(id);
-                if (goodsDonation != null)
-                {
-                    _context.GoodsDonation.Remove(goodsDonation);
-                }
+            var donation = await _context.GoodsDonation.FindAsync(id);
+            if (donation == null)
+                return NotFound();
 
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                Console.WriteLine($"Error in DeleteConfirmed: {ex.Message}");
-                return StatusCode(500, "An error occurred while deleting a goods donation.");
-            }
-        }
+            // Only allow owner or admin
+            if (donation.DONOR != User.Identity?.Name && !User.IsInRole("Admin"))
+                return Forbid();
 
-        private bool GoodsDonationExists(int id)
-        {
-            try
-            {
-                return _context.GoodsDonation.Any(e => e.GOODS_DONATION_ID == id);
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                Console.WriteLine($"Error in GoodsDonationExists: {ex.Message}");
-                return false;
-            }
+            _context.GoodsDonation.Remove(donation);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Donation deleted successfully!";
+            return RedirectToAction(User.IsInRole("Admin") ? "Index" : "Create");
         }
     }
 }

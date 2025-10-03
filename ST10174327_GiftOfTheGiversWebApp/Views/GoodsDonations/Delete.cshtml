@@ -1,4 +1,4 @@
-﻿@model GoodsDonation
+﻿@model ST10174327_GiftOfTheGiversWebApp.Models.GoodsDonation
 
 <div class="container my-5">
     <div class="text-center mb-4">
@@ -11,14 +11,19 @@
             <dl class="row">
                 <dt class="col-sm-3">Username</dt>
                 <dd class="col-sm-9">@Model.USERNAME</dd>
+
                 <dt class="col-sm-3">Date</dt>
-                <dd class="col-sm-9">@Model.DATE?.ToShortDateString()</dd>
+                <dd class="col-sm-9">@Model.DATE.ToString("MMM dd, yyyy")</dd>
+
                 <dt class="col-sm-3">Item Count</dt>
                 <dd class="col-sm-9">@Model.ITEM_COUNT</dd>
+
                 <dt class="col-sm-3">Category</dt>
                 <dd class="col-sm-9">@Model.CATEGORY</dd>
+
                 <dt class="col-sm-3">Description</dt>
                 <dd class="col-sm-9">@Model.DESCRIPTION</dd>
+
                 <dt class="col-sm-3">Donor</dt>
                 <dd class="col-sm-9">@Model.DONOR</dd>
             </dl>
@@ -32,4 +37,4 @@
             </form>
         </div>
     </div>
-</div>
+</div>  

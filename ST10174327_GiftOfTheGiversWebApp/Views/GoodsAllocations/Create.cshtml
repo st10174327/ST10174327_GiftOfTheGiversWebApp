@@ -1,4 +1,4 @@
-﻿@model GoodsAllocation
+﻿@model ST10174327_GiftOfTheGiversWebApp.Models.GoodsAllocation
 
 @{
     ViewData["Title"] = "Create Goods Allocation";
@@ -45,10 +45,12 @@
 
 @section Scripts {
     <script>
-        $(function () {
+                $(function () {
+            var itemCountSelect = $("#itemCountSelect");
+            itemCountSelect.prop('disabled', true);
+
             $("#CATEGORY").on("change", function () {
                 var category = $(this).val();
-                var itemCountSelect = $("#itemCountSelect");
                 itemCountSelect.empty();
                 itemCountSelect.append('<option value="">-- Select Item Count --</option>');
 
@@ -58,13 +60,22 @@
                         url: "/GoodsAllocations/GetSumOfItemCount",
                         data: { category: category },
                         success: function (sumOfItemCount) {
-                            for (var i = 1; i <= sumOfItemCount; i++) {
+                            var maxCount = Math.min(sumOfItemCount, 100);
+                            for (var i = 1; i <= maxCount; i++) {
                                 itemCountSelect.append('<option value="' + i + '">' + i + '</option>');
                             }
+                            itemCountSelect.prop('disabled', false);
+                        },
+                        error: function () {
+                            alert("Failed to load item count.");
+                            itemCountSelect.prop('disabled', true);
                         }
                     });
+                } else {
+                    itemCountSelect.prop('disabled', true);
                 }
             });
         });
+
     </script>
 }

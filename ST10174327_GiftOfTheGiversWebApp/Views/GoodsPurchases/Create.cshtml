@@ -1,4 +1,4 @@
-﻿@model GoodsPurchase
+﻿@model ST10174327_GiftOfTheGiversWebApp.Models.GoodsPurchase
 
 @{
     ViewData["Title"] = "Create Goods Purchase";
@@ -10,9 +10,10 @@
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <form asp-action="Create">
+            <form asp-action="Create" method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
+                <!-- Category Selection -->
                 <div class="mb-3">
                     <label asp-for="CATEGORY" class="form-label">Category</label>
                     <select asp-for="CATEGORY" asp-items="ViewBag.Categories" class="form-select" id="CATEGORY">
@@ -21,18 +22,21 @@
                     <span asp-validation-for="CATEGORY" class="text-danger"></span>
                 </div>
 
+                <!-- Item Count -->
                 <div class="mb-3">
                     <label asp-for="ITEM_COUNT" class="form-label">Item Count</label>
                     <input asp-for="ITEM_COUNT" class="form-control" type="number" min="1" />
                     <span asp-validation-for="ITEM_COUNT" class="text-danger"></span>
                 </div>
 
+                <!-- Item Price -->
                 <div class="mb-3">
                     <label asp-for="GoodsPurchasePrice" class="form-label">Item Price</label>
                     <input asp-for="GoodsPurchasePrice" class="form-control" type="number" step="0.01" min="0" />
                     <span asp-validation-for="GoodsPurchasePrice" class="text-danger"></span>
                 </div>
 
+                <!-- Add New Category -->
                 <div class="mb-3">
                     <button type="button" id="addCategoryButton" class="btn btn-primary">Add New Category</button>
                 </div>
@@ -66,12 +70,14 @@
             var newForm = $("#newCategoryForm");
             var newName = $("#newCategoryName");
 
+            // Show the new category form
             addBtn.click(function () {
                 addBtn.prop("disabled", true);
                 categoryDropdown.prop("disabled", true);
                 newForm.show();
             });
 
+            // Cancel adding new category
             $("#cancelCategoryButton").click(function () {
                 addBtn.prop("disabled", false);
                 categoryDropdown.prop("disabled", false);
@@ -79,8 +85,9 @@
                 newName.val("");
             });
 
+            // Add new category to dropdown
             $("#createCategoryButton").click(function () {
-                var value = newName.val();
+                var value = newName.val().trim();
                 if (value) {
                     categoryDropdown.append(new Option(value, value, true, true));
                     addBtn.prop("disabled", false);

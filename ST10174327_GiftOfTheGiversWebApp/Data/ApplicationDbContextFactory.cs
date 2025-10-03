@@ -9,18 +9,18 @@ namespace ST10174327_GiftOfTheGiversWebApp.Data
     {
         public ApplicationDbContext CreateDbContext(string[] args)
         {
-            // Build config to read appsettings.json
             var config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json")
                 .Build();
 
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-            var connectionString = config.GetConnectionString("GiftOfTheGiversContext");
+            var connectionString = config.GetConnectionString("DefaultConnection"); // ✅ fixed
 
             optionsBuilder.UseSqlServer(connectionString);
 
             return new ApplicationDbContext(optionsBuilder.Options);
         }
+
     }
 }

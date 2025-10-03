@@ -1,4 +1,4 @@
-﻿@model Disaster
+﻿@model ST10174327_GiftOfTheGiversWebApp.Models.Disaster
 @{
     ViewData["Title"] = "Edit Disaster";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -11,43 +11,60 @@
     <div class="row justify-content-center">
         <div class="col-md-6">
             <form asp-action="Edit" class="needs-validation" novalidate>
-                <input type="hidden" asp-for="DISTATER_ID" />
+                <input type="hidden" asp-for="DISASTER_ID" />
                 <input type="hidden" asp-for="USERNAME" />
 
                 <div class="mb-3">
-                    <label asp-for="STARTDATE" class="form-label"></label>
+                    <label asp-for="DisasterName" class="form-label">Disaster Name</label>
+                    <input asp-for="DisasterName" class="form-control" />
+                    <span asp-validation-for="DisasterName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="STARTDATE" class="form-label">Start Date</label>
                     <input asp-for="STARTDATE" class="form-control" type="date" />
                     <span asp-validation-for="STARTDATE" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="ENDDATE" class="form-label"></label>
+                    <label asp-for="ENDDATE" class="form-label">End Date</label>
                     <input asp-for="ENDDATE" class="form-control" type="date" />
                     <span asp-validation-for="ENDDATE" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="LOCATION" class="form-label"></label>
+                    <label asp-for="LOCATION" class="form-label">Location</label>
                     <input asp-for="LOCATION" class="form-control" />
                     <span asp-validation-for="LOCATION" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="AID_TYPE" class="form-label"></label>
+                    <label asp-for="AID_TYPE" class="form-label">Aid Type</label>
                     <select asp-for="AID_TYPE" class="form-select">
                         <option value="">-- Select an Aid Type --</option>
-                        <option>Emergency Shelter</option>
-                        <option>Food Assistance</option>
-                        <option>Medical Aid</option>
-                        <option>Clean Water and Sanitation</option>
-                        <option>Search and Rescue</option>
-                        <option>Psychological Support</option>
-                        <option>Logistical Support</option>
-                        <option>Infrastructure Repair</option>
-                        <option>Educational Support</option>
-                        <option>Livelihood Assistance</option>
+                        <option value="Emergency Shelter">Emergency Shelter</option>
+                        <option value="Food Assistance">Food Assistance</option>
+                        <option value="Medical Aid">Medical Aid</option>
+                        <option value="Clean Water and Sanitation">Clean Water and Sanitation</option>
+                        <option value="Search and Rescue">Search and Rescue</option>
+                        <option value="Psychological Support">Psychological Support</option>
+                        <option value="Logistical Support">Logistical Support</option>
+                        <option value="Infrastructure Repair">Infrastructure Repair</option>
+                        <option value="Educational Support">Educational Support</option>
+                        <option value="Livelihood Assistance">Livelihood Assistance</option>
                     </select>
                     <span asp-validation-for="AID_TYPE" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label">Description</label>
+                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input asp-for="IsActive" class="form-check-input" type="checkbox" value="1" checked="@(Model.IsActive == 1)" />
+                    <label asp-for="IsActive" class="form-check-label">Active Disaster</label>
                 </div>
 
                 <button type="submit" class="btn btn-primary">Save Changes</button>
@@ -59,4 +76,4 @@
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
-}
+} 

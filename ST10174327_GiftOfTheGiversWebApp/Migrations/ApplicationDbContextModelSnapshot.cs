@@ -435,6 +435,48 @@ namespace ST10174327_GiftOfTheGiversWebApp.Migrations
                     b.ToTable("MoneyDonation");
                 });
 
+            modelBuilder.Entity("ST10174327_GiftOfTheGiversWebApp.Models.TaskAssignment", b =>
+                {
+                    b.Property<int>("AssignmentID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AssignmentID"));
+
+                    b.Property<string>("AdminFeedback")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("AssignmentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("HoursWorked")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("TaskID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VolunteerID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("VolunteerNotes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("AssignmentID");
+
+                    b.HasIndex("TaskID");
+
+                    b.HasIndex("VolunteerID");
+
+                    b.ToTable("TaskAssignments");
+                });
+
             modelBuilder.Entity("ST10174327_GiftOfTheGiversWebApp.Models.Volunteer", b =>
                 {
                     b.Property<int>("VolunteerID")
@@ -443,9 +485,21 @@ namespace ST10174327_GiftOfTheGiversWebApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VolunteerID"));
 
+                    b.Property<string>("Address")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Availability")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EmergencyContact")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -459,9 +513,71 @@ namespace ST10174327_GiftOfTheGiversWebApp.Migrations
                     b.Property<DateTime>("RegistrationDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Skills")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.HasKey("VolunteerID");
 
                     b.ToTable("Volunteers");
+                });
+
+            modelBuilder.Entity("ST10174327_GiftOfTheGiversWebApp.Models.VolunteerTask", b =>
+                {
+                    b.Property<int>("TaskID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TaskID"));
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("CurrentVolunteers")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("RequiredVolunteers")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SkillsRequired")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("TaskLocation")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("TaskID");
+
+                    b.ToTable("VolunteerTasks");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -513,6 +629,35 @@ namespace ST10174327_GiftOfTheGiversWebApp.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ST10174327_GiftOfTheGiversWebApp.Models.TaskAssignment", b =>
+                {
+                    b.HasOne("ST10174327_GiftOfTheGiversWebApp.Models.VolunteerTask", "VolunteerTask")
+                        .WithMany("Assignments")
+                        .HasForeignKey("TaskID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ST10174327_GiftOfTheGiversWebApp.Models.Volunteer", "Volunteer")
+                        .WithMany("Tasks")
+                        .HasForeignKey("VolunteerID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Volunteer");
+
+                    b.Navigation("VolunteerTask");
+                });
+
+            modelBuilder.Entity("ST10174327_GiftOfTheGiversWebApp.Models.Volunteer", b =>
+                {
+                    b.Navigation("Tasks");
+                });
+
+            modelBuilder.Entity("ST10174327_GiftOfTheGiversWebApp.Models.VolunteerTask", b =>
+                {
+                    b.Navigation("Assignments");
                 });
 #pragma warning restore 612, 618
         }

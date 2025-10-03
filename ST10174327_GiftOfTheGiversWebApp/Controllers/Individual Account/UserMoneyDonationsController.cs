@@ -3,10 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ST10174327_GiftOfTheGiversWebApp.Data;
-using ST10174327_GiftOfTheGiversWebApp;
 using ST10174327_GiftOfTheGiversWebApp.Models;
 
 namespace ST10174327_GiftOfTheGiversWebApp.Controllers
@@ -20,13 +18,12 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             _context = context;
         }
 
+        // GET: UserMoneyDonations
         [Authorize]
         public async Task<IActionResult> Index()
         {
             if (!User.Identity.IsAuthenticated)
-            {
                 return RedirectToAction("Login", "Account");
-            }
 
             string currentUsername = User.Identity.Name;
             var userMoneyDonations = await _context.MoneyDonation
@@ -36,42 +33,36 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             return View(userMoneyDonations);
         }
 
+        // GET: Details
         [Authorize]
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.MoneyDonation == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var moneyDonation = await _context.MoneyDonation
                 .FirstOrDefaultAsync(m => m.MONEY_DONATION_ID == id);
 
-            if (moneyDonation == null)
-            {
-                return NotFound();
-            }
+            if (moneyDonation == null) return NotFound();
 
             return View(moneyDonation);
         }
 
+        // GET: Create
         [Authorize]
         public IActionResult Create()
         {
             return View();
         }
 
+        // POST: Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Create([Bind("MONEY_DONATION_ID,USERNAME,DATE,AMOUNT,DONOR")] MoneyDonation moneyDonation)
+        public async Task<IActionResult> Create([Bind("MONEY_DONATION_ID,DATE,AMOUNT,DONOR")] MoneyDonation moneyDonation)
         {
             if (ModelState.IsValid)
             {
-                // Get the current logged-in username
-                string currentUsername = @User.Identity.Name;
-
-                // Set the username of the donation to the current user's username
+                string currentUsername = User.Identity.Name;
                 moneyDonation.USERNAME = currentUsername;
 
                 if (moneyDonation.DATE < DateTime.Now.Date)
@@ -80,21 +71,13 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
                     return View(moneyDonation);
                 }
 
-                // Check if the user selected "Anonymous" as the donor
-                if (moneyDonation.DONOR == "Anonymous")
-                {
-                    moneyDonation.DONOR = "Anonymous";
-                }
-                else
-                {
-                    // Set DONOR to the current logged-in user's username
-                    var currentUser = User.Identity?.Name;
-                    moneyDonation.DONOR = currentUser;
-                }
+                // Handle donor name
+                moneyDonation.DONOR = (moneyDonation.DONOR == "Anonymous")
+                    ? "Anonymous"
+                    : currentUsername;
 
-                // Retrieve the existing Money entity or create a new one
+                // Update central Money table
                 var money = _context.Money.FirstOrDefault();
-
                 if (money == null)
                 {
                     money = new Money
@@ -106,14 +89,12 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
                 }
                 else
                 {
-                    // Update the existing Money entity
                     money.TotalMoney += moneyDonation.AMOUNT;
                     money.RemainingMoney += moneyDonation.AMOUNT;
+                    _context.Update(money);
                 }
 
-                // Add the money donation to the context
                 _context.Add(moneyDonation);
-
                 await _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
@@ -121,116 +102,99 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             return View(moneyDonation);
         }
 
+        // GET: Edit
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.MoneyDonation == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var moneyDonation = await _context.MoneyDonation.FindAsync(id);
-
-            if (moneyDonation == null || moneyDonation.USERNAME != User.Identity.Name)
-            {
-                return NotFound();
-            }
+            if (moneyDonation == null) return NotFound();
 
             return View(moneyDonation);
         }
 
+        // POST: Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id, [Bind("MONEY_DONATION_ID, USERNAME, DATE, AMOUNT, DONOR")] MoneyDonation moneyDonation)
+        public async Task<IActionResult> Edit(int id, [Bind("MONEY_DONATION_ID,USERNAME,DATE,AMOUNT,DONOR")] MoneyDonation updatedDonation)
         {
-            if (id != moneyDonation.MONEY_DONATION_ID)
-            {
-                return NotFound();
-            }
+            if (id != updatedDonation.MONEY_DONATION_ID) return NotFound();
 
-            var existingMoneyDonation = await _context.MoneyDonation.FindAsync(id);
-
-            if (existingMoneyDonation == null || existingMoneyDonation.USERNAME != User.Identity.Name)
-            {
-                return NotFound();
-            }
+            var existingDonation = await _context.MoneyDonation.FindAsync(id);
+            if (existingDonation == null) return NotFound();
 
             if (ModelState.IsValid)
             {
-                // Calculate the difference in donation amount for updating TotalMoney and RemainingMoney
-                decimal donationDifference = moneyDonation.AMOUNT - existingMoneyDonation.AMOUNT;
+                try
+                {
+                    decimal difference = updatedDonation.AMOUNT - existingDonation.AMOUNT;
 
-                // Update TotalMoney and RemainingMoney accordingly
-                var money = _context.Money.First(); // Assuming you have a single record for Money
+                    // Update money totals
+                    var money = _context.Money.First();
+                    money.TotalMoney += difference;
+                    money.RemainingMoney += difference;
+                    _context.Update(money);
 
-                money.TotalMoney += donationDifference;
-                money.RemainingMoney += donationDifference;
+                    // Update donation
+                    existingDonation.DATE = updatedDonation.DATE;
+                    existingDonation.AMOUNT = updatedDonation.AMOUNT;
+                    existingDonation.DONOR = updatedDonation.DONOR;
+                    _context.Update(existingDonation);
 
-                _context.Update(money);
-                _context.Update(moneyDonation);
-
-                await _context.SaveChangesAsync();
-
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!MoneyDonationExists(updatedDonation.MONEY_DONATION_ID))
+                        return NotFound();
+                    else
+                        throw;
+                }
                 return RedirectToAction(nameof(Index));
             }
-
-            return View(moneyDonation);
+            return View(updatedDonation);
         }
 
+        // GET: Delete
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.MoneyDonation == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var moneyDonation = await _context.MoneyDonation
                 .FirstOrDefaultAsync(m => m.MONEY_DONATION_ID == id);
 
-            if (moneyDonation == null || moneyDonation.USERNAME != User.Identity.Name)
-            {
-                return NotFound();
-            }
+            if (moneyDonation == null) return NotFound();
 
             return View(moneyDonation);
         }
 
+        // POST: Delete
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.MoneyDonation == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.MoneyDonation'  is null.");
-            }
-
             var moneyDonation = await _context.MoneyDonation.FindAsync(id);
+            if (moneyDonation == null) return NotFound();
 
-            if (moneyDonation != null || moneyDonation.USERNAME != User.Identity.Name)
-            {
-                // Calculate the difference in donation amount for updating TotalMoney and RemainingMoney
-                decimal donationDifference = -moneyDonation.AMOUNT;
+            // Adjust totals
+            var money = _context.Money.First();
+            money.TotalMoney -= moneyDonation.AMOUNT;
+            money.RemainingMoney -= moneyDonation.AMOUNT;
+            _context.Update(money);
 
-                // Update TotalMoney and RemainingMoney accordingly
-                var money = _context.Money.First(); // Assuming you have a single record for Money
-
-                money.TotalMoney += donationDifference;
-                money.RemainingMoney += donationDifference;
-
-                _context.Update(money);
-                _context.Remove(moneyDonation);
-                await _context.SaveChangesAsync();
-            }
+            _context.MoneyDonation.Remove(moneyDonation);
+            await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
 
         private bool MoneyDonationExists(int id)
         {
-            return _context.MoneyDonation.Any(e => e.MONEY_DONATION_ID == id && e.USERNAME == User.Identity.Name);
+            return _context.MoneyDonation.Any(e => e.MONEY_DONATION_ID == id);
         }
     }
 }

@@ -1,42 +1,62 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ST10174327_GiftOfTheGiversWebApp.Models
 {
-    // This class represents a goods donation
+    /// <summary>
+    /// Represents a donation of goods by a user.
+    /// </summary>
     public class GoodsDonation
     {
-        // Primary key and required field for the goods donation ID
+        /// <summary>
+        /// Primary key: uniquely identifies the goods donation.
+        /// </summary>
         [Key]
-        [Required]
         public int GOODS_DONATION_ID { get; set; }
 
-        // The username of the person making the donation
-        public string USERNAME { get; set; }
+        /// <summary>
+        /// Username of the person making the donation.
+        /// </summary>
+        [Required]
+        [StringLength(100)]
+        public string USERNAME { get; set; } = string.Empty;
 
-        // Required field for the date of the donation
+        /// <summary>
+        /// Date of the donation.
+        /// </summary>
         [Required]
         [DataType(DataType.Date)]
         [Display(Name = "Donation Date")]
-        public DateTime? DATE { get; set; }
+        public DateTime DATE { get; set; }
 
-        // Required field for the number of items being donated
+        /// <summary>
+        /// Number of items donated.
+        /// </summary>
         [Required]
-        [Display(Name = "Number of items")]
+        [Range(1, int.MaxValue, ErrorMessage = "Item count must be at least 1.")]
+        [Display(Name = "Number of Items")]
         public int ITEM_COUNT { get; set; }
 
-        // Required field for the category of the donated goods
+        /// <summary>
+        /// Category of the donated goods.
+        /// </summary>
         [Required]
+        [StringLength(100)]
         [Display(Name = "Category")]
-        public string? CATEGORY { get; set; }
+        public string CATEGORY { get; set; } = string.Empty;
 
-        // Required field for the description of the donated goods
+        /// <summary>
+        /// Description of the donated goods.
+        /// </summary>
         [Required]
+        [StringLength(500)]
         [Display(Name = "Description")]
-        public string? DESCRIPTION { get; set; }
+        public string DESCRIPTION { get; set; } = string.Empty;
 
-        // Optional field for the name of the donor
+        /// <summary>
+        /// Name of the donor (optional, can be "Anonymous").
+        /// </summary>
+        [StringLength(100)]
         [Display(Name = "Donor")]
         public string? DONOR { get; set; }
     }

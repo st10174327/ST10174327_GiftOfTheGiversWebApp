@@ -1,28 +1,47 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore;
 using ST10174327_GiftOfTheGiversWebApp.Data;
+
+using Microsoft.AspNetCore.Identity.UI;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// 1. Register ApplicationDbContext
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("GiftOfTheGiversContext")));
+// 1. Configure database
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                       ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-// 2. Add Identity services
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+// 2. Add developer exception page for migrations
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+// 3. Configure Identity with roles
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
-    options.SignIn.RequireConfirmedAccount = false; // Change to true if you want email confirmation
+    options.SignIn.RequireConfirmedAccount = false;
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequiredLength = 6;
 })
+.AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// 3. Add MVC controllers with views
+// 4. Add MVC controllers with views
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+// 5. Configure middleware
+if (app.Environment.IsDevelopment())
+{
+    app.UseMigrationsEndPoint();
+}
+else
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
@@ -33,15 +52,49 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// 4. Add authentication and authorization middleware
-app.UseAuthentication();
+app.UseAuthentication();  // Must come before UseAuthorization
 app.UseAuthorization();
 
-// 5. Map default routes and Razor pages for Identity UI
+// 6. Map routes for controllers and Razor Pages
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.MapRazorPages(); // Required for Identity pages like Register/Login
+app.MapRazorPages();
 
-app.Run();
+// 7. Seed roles and admin user
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+
+    // Create roles if they don't exist
+    string[] roles = { "Admin", "User" };
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+            await roleManager.CreateAsync(new IdentityRole(role));
+    }
+
+    // Create default admin if not exists
+    string adminEmail = "admin@admin.com";
+    string adminPassword = "Test1234!"; // Ensure password meets Identity rules
+
+    if (await userManager.FindByEmailAsync(adminEmail) == null)
+    {
+        var adminUser = new IdentityUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            EmailConfirmed = true
+        };
+
+        var result = await userManager.CreateAsync(adminUser, adminPassword);
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
+    }
+}
+
+app.Run();   

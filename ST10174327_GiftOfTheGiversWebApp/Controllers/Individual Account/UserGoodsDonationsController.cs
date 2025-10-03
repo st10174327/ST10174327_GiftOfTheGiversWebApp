@@ -1,23 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using ST10174327_GiftOfTheGiversWebApp;
-using ST10174327_GiftOfTheGiversWebApp.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using ST10174327_GiftOfTheGiversWebApp.Models;
 using ST10174327_GiftOfTheGiversWebApp.Data;
-
+using ST10174327_GiftOfTheGiversWebApp.Models;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace ST10174327_GiftOfTheGiversWebApp.Controllers
 {
-    
+    [Authorize] // Require login for everything
     public class UserGoodsDonationsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -28,19 +20,17 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         }
 
         // GET: UserGoodsDonations
-        [Authorize]
         public async Task<IActionResult> Index()
         {
-            if (!@User.Identity.IsAuthenticated)
+            string? currentUsername = User.Identity?.Name;
+
+            if (User.IsInRole("Admin"))
             {
-                // User is not logged in, handle this case as needed (e.g., redirect to login)
-                return RedirectToAction("Login", "Account");
+                // Admin sees all donations
+                return View(await _context.GoodsDonation.ToListAsync());
             }
 
-            // Get the current logged-in username
-            string currentUsername = @User.Identity.Name;
-
-            // Query the data for the current username
+            // User sees only their own donations
             var userGoodsDonations = await _context.GoodsDonation
                 .Where(d => d.USERNAME == currentUsername)
                 .ToListAsync();
@@ -48,273 +38,165 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             return View(userGoodsDonations);
         }
 
-        // GET: UserGoodsDonations/Details/5
-        [Authorize]
+        // GET: Details
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.GoodsDonation == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var goodsDonation = await _context.GoodsDonation
-                .FirstOrDefaultAsync(m => m.GOODS_DONATION_ID == id);
-            if (goodsDonation == null)
-            {
-                return NotFound();
-            }
+            var donation = await _context.GoodsDonation.FirstOrDefaultAsync(m => m.GOODS_DONATION_ID == id);
+            if (donation == null) return NotFound();
 
-            return View(goodsDonation);
+            if (!User.IsInRole("Admin") && donation.USERNAME != User.Identity?.Name)
+                return Forbid();
+
+            return View(donation);
         }
 
-        // GET: UserGoodsDonations/Create
-        [Authorize]
+        // GET: Create
         public IActionResult Create()
         {
-            // Get the unique categories for the logged-in user, excluding "Cloths" and "Non-Perishable Foods"
-            var existingCategories = _context.GoodsDonation
-                .Where(d => d.USERNAME == User.Identity.Name && d.CATEGORY != "Cloths" && d.CATEGORY != "Non-Perishable Foods")
-                .Select(d => d.CATEGORY)
-                .Distinct()
-                .ToList();
-
-            ViewBag.CategoryList = existingCategories;
-
-            return View();
+            return View(new GoodsDonation
+            {
+                DATE = DateTime.Now.Date
+            });
         }
 
-        // POST: UserGoodsDonations/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        // POST: UserGoodsDonations/Create
-        // POST: UserGoodsDonations/Create
+        // POST: Create
         [HttpPost]
-        [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("GOODS_DONATION_ID, USERNAME, DATE, ITEM_COUNT, CATEGORY, DESCRIPTION, DONOR")] GoodsDonation goodsDonation)
+        public async Task<IActionResult> Create([Bind("DATE,ITEM_COUNT,CATEGORY,DESCRIPTION,DONOR")] GoodsDonation donation)
         {
-            if (ModelState.IsValid)
+            string? currentUsername = User.Identity?.Name;
+            if (string.IsNullOrEmpty(currentUsername))
+                return RedirectToAction("Login", "Account");
+
+            if (!ModelState.IsValid) return View(donation);
+
+            if (donation.DATE < DateTime.Now.Date)
             {
-                if (goodsDonation.DATE < DateTime.Now.Date)
+                ModelState.AddModelError("DATE", "Date cannot be earlier than today.");
+                return View(donation);
+            }
+
+            // assign correct username
+            donation.USERNAME = currentUsername;
+
+            // if not anonymous, force username as donor
+            donation.DONOR = (donation.DONOR == "Anonymous") ? "Anonymous" : currentUsername;
+
+            // update inventory
+            var inventoryItem = await _context.GoodsInventory.FirstOrDefaultAsync(g => g.CATEGORY == donation.CATEGORY);
+            if (inventoryItem != null)
+                inventoryItem.ITEM_COUNT += donation.ITEM_COUNT;
+            else
+                _context.GoodsInventory.Add(new GoodsInventory
                 {
-                    ModelState.AddModelError("DATE", "Date cannot be earlier than today.");
-                    return View(goodsDonation);
-                }
+                    CATEGORY = donation.CATEGORY,
+                    ITEM_COUNT = donation.ITEM_COUNT
+                });
 
-                // Check if the user selected "Anonymous" as the donor
-                if (goodsDonation.DONOR == "Anonymous")
-                {
-                    goodsDonation.DONOR = "Anonymous";
-                }
-                else
-                {
-                    // Set DONOR to the current logged-in user's username
-                    var currentUser = User.Identity?.Name;
-                    goodsDonation.DONOR = currentUser;
-                }
-
-                // Check if the category exists in the GoodsInventory
-                var inventoryItem = _context.GoodsInventory.FirstOrDefault(g => g.CATEGORY == goodsDonation.CATEGORY);
-
-                if (inventoryItem != null)
-                {
-                    // Update the item count in the existing record
-                    inventoryItem.ITEM_COUNT += goodsDonation.ITEM_COUNT;
-                }
-                else
-                {
-                    // Create a new record in the GoodsInventory
-                    _context.GoodsInventory.Add(new GoodsInventory
-                    {
-                        CATEGORY = goodsDonation.CATEGORY, // Corrected the property name
-                        ITEM_COUNT = goodsDonation.ITEM_COUNT
-                    });
-                }
-
-                // Check if the category already exists in the user's previous donations
-                var existingCategories = _context.GoodsDonation
-                    .Where(d => d.USERNAME == goodsDonation.USERNAME && d.CATEGORY != "Cloths" && d.CATEGORY != "Non-Perishable Foods")
-                    .Select(d => d.CATEGORY)
-                    .Distinct()
-                    .ToList();
-
-                if (!existingCategories.Contains(goodsDonation.CATEGORY))
-                {
-                    existingCategories.Add(goodsDonation.CATEGORY);
-                }
-
-                ViewBag.CategoryList = existingCategories;
-
-                _context.Add(goodsDonation);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-
-            // If the model is not valid, we need to repopulate the category dropdown with the unique categories.
-            var existingUserCategories = _context.GoodsDonation
-                .Where(d => d.USERNAME == goodsDonation.USERNAME && d.CATEGORY != "Cloths" && d.CATEGORY != "Non-perishable foods")
-                .Select(d => d.CATEGORY)
-                .Distinct()
-                .ToList();
-
-            ViewBag.CategoryList = new SelectList(existingUserCategories);
-
-            return View(goodsDonation);
-        }
-
-        // GET: UserGoodsDonations/Edit/5
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null || _context.GoodsDonation == null)
-            {
-                return NotFound();
-            }
-
-            var goodsDonation = await _context.GoodsDonation
-                .FirstOrDefaultAsync(m => m.GOODS_DONATION_ID == id);
-            if (goodsDonation == null || goodsDonation.USERNAME != @User.Identity.Name)
-            {
-                // Either the goods donation doesn't exist or it doesn't belong to the current user
-                return NotFound();
-            }
-            return View(goodsDonation);
-        }
-
-        // POST: UserGoodsDonations/Edit/5
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("GOODS_DONATION_ID,USERNAME,DATE,ITEM_COUNT,CATEGORY,DESCRIPTION,DONOR")] GoodsDonation updatedGoodsDonation)
-        {
-            if (id != updatedGoodsDonation.GOODS_DONATION_ID)
-            {
-                return NotFound();
-            }
-
-            var existingGoodsDonation = await _context.GoodsDonation.FindAsync(id);
-
-            if (existingGoodsDonation == null || existingGoodsDonation.USERNAME != @User.Identity.Name)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    existingGoodsDonation.USERNAME = updatedGoodsDonation.USERNAME;
-                    existingGoodsDonation.DATE = updatedGoodsDonation.DATE;
-                    existingGoodsDonation.ITEM_COUNT = updatedGoodsDonation.ITEM_COUNT;
-                    existingGoodsDonation.CATEGORY = updatedGoodsDonation.CATEGORY;
-                    existingGoodsDonation.DESCRIPTION = updatedGoodsDonation.DESCRIPTION;
-                    existingGoodsDonation.DONOR = updatedGoodsDonation.DONOR;
-
-                    // Update the existing entity
-                    _context.Update(existingGoodsDonation);
-
-                    // Update the GoodsInventory item for the category
-                    var inventoryItem = _context.GoodsInventory.FirstOrDefault(g => g.CATEGORY == updatedGoodsDonation.CATEGORY);
-                    if (inventoryItem != null)
-                    {
-                        inventoryItem.ITEM_COUNT += (updatedGoodsDonation.ITEM_COUNT - existingGoodsDonation.ITEM_COUNT);
-
-                        // If the item count becomes zero, remove the category from GoodsInventory
-                        if (inventoryItem.ITEM_COUNT <= 0)
-                        {
-                            _context.GoodsInventory.Remove(inventoryItem);
-                        }
-                    }
-                    else
-                    {
-                        // Create a new record in GoodsInventory
-                        _context.GoodsInventory.Add(new GoodsInventory
-                        {
-                            CATEGORY = updatedGoodsDonation.CATEGORY,
-                            ITEM_COUNT = updatedGoodsDonation.ITEM_COUNT
-                        });
-                    }
-
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!GoodsDonationExists(existingGoodsDonation.GOODS_DONATION_ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(updatedGoodsDonation);
-        }
-
-
-
-        // GET: UserGoodsDonations/Delete/5
-
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _context.GoodsDonation == null)
-            {
-                return NotFound();
-            }
-
-            var goodsDonation = await _context.GoodsDonation
-                .FirstOrDefaultAsync(m => m.GOODS_DONATION_ID == id);
-            if (goodsDonation == null || goodsDonation.USERNAME != @User.Identity.Name)
-            {
-                return NotFound();
-            }
-
-            return View(goodsDonation);
-        }
-
-        // POST: UserGoodsDonations/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.GoodsDonation == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.GoodsDonation'  is null.");
-            }
-            var goodsDonation = await _context.GoodsDonation.FindAsync(id);
-            if (goodsDonation != null && goodsDonation.USERNAME == @User.Identity.Name)
-            {
-                // Get the category of the goods donation
-                var category = goodsDonation.CATEGORY;
-
-                // Update the GoodsInventory item for the category
-                var inventoryItem = _context.GoodsInventory.FirstOrDefault(g => g.CATEGORY == category);
-                if (inventoryItem != null)
-                {
-                    inventoryItem.ITEM_COUNT -= goodsDonation.ITEM_COUNT;
-
-                    // If the item count becomes zero, remove the category from GoodsInventory
-                    if (inventoryItem.ITEM_COUNT <= 0)
-                    {
-                        _context.GoodsInventory.Remove(inventoryItem);
-                    }
-                }
-
-                _context.GoodsDonation.Remove(goodsDonation);
-                await _context.SaveChangesAsync();
-            }
-
+            _context.Add(donation);
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-
-        private bool GoodsDonationExists(int id)
+        // GET: Edit
+        [Authorize(Roles = "Admin,User")]
+        public async Task<IActionResult> Edit(int? id)
         {
-            return _context.GoodsDonation.Any(e => e.GOODS_DONATION_ID == id && e.USERNAME == @User.Identity.Name);
+            if (id == null) return NotFound();
+
+            var donation = await _context.GoodsDonation.FindAsync(id);
+            if (donation == null) return NotFound();
+
+            if (!User.IsInRole("Admin") && donation.USERNAME != User.Identity?.Name)
+                return Forbid();
+
+            return View(donation);
+        }
+
+        // POST: Edit
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,User")]
+        public async Task<IActionResult> Edit(int id, [Bind("DATE,ITEM_COUNT,CATEGORY,DESCRIPTION,DONOR")] GoodsDonation updatedDonation)
+        {
+            var existing = await _context.GoodsDonation.FindAsync(id);
+            if (existing == null) return NotFound();
+
+            if (!User.IsInRole("Admin") && existing.USERNAME != User.Identity?.Name)
+                return Forbid();
+
+            if (!ModelState.IsValid) return View(updatedDonation);
+
+            // track inventory change before overwriting
+            int oldCount = existing.ITEM_COUNT;
+            string oldCategory = existing.CATEGORY;
+
+            // update fields
+            existing.DATE = updatedDonation.DATE;
+            existing.ITEM_COUNT = updatedDonation.ITEM_COUNT;
+            existing.CATEGORY = updatedDonation.CATEGORY;
+            existing.DESCRIPTION = updatedDonation.DESCRIPTION;
+            existing.DONOR = (updatedDonation.DONOR == "Anonymous") ? "Anonymous" : existing.USERNAME;
+
+            // update inventory
+            var oldInventory = await _context.GoodsInventory.FirstOrDefaultAsync(g => g.CATEGORY == oldCategory);
+            if (oldInventory != null) oldInventory.ITEM_COUNT -= oldCount;
+
+            var newInventory = await _context.GoodsInventory.FirstOrDefaultAsync(g => g.CATEGORY == existing.CATEGORY);
+            if (newInventory != null)
+                newInventory.ITEM_COUNT += existing.ITEM_COUNT;
+            else
+                _context.GoodsInventory.Add(new GoodsInventory
+                {
+                    CATEGORY = existing.CATEGORY,
+                    ITEM_COUNT = existing.ITEM_COUNT
+                });
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: Delete
+        [Authorize(Roles = "Admin,User")]
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var donation = await _context.GoodsDonation.FirstOrDefaultAsync(m => m.GOODS_DONATION_ID == id);
+            if (donation == null) return NotFound();
+
+            if (!User.IsInRole("Admin") && donation.USERNAME != User.Identity?.Name)
+                return Forbid();
+
+            return View(donation);
+        }
+
+        // POST: Delete
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,User")]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var donation = await _context.GoodsDonation.FindAsync(id);
+            if (donation == null) return NotFound();
+
+            if (!User.IsInRole("Admin") && donation.USERNAME != User.Identity?.Name)
+                return Forbid();
+
+            // update inventory
+            var inventoryItem = await _context.GoodsInventory.FirstOrDefaultAsync(g => g.CATEGORY == donation.CATEGORY);
+            if (inventoryItem != null)
+            {
+                inventoryItem.ITEM_COUNT -= donation.ITEM_COUNT;
+                if (inventoryItem.ITEM_COUNT <= 0)
+                    _context.GoodsInventory.Remove(inventoryItem);
+            }
+
+            _context.GoodsDonation.Remove(donation);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
     }
 }

@@ -1,25 +1,38 @@
-﻿@model GoodsDonation
+﻿@model ST10174327_GiftOfTheGiversWebApp.Models.GoodsDonation
 
 <div class="container mt-4">
-    <h3>Donation Details</h3>
+    <h2 class="mb-3">Goods Donation Details</h2>
     <hr />
+
+    <p class="text-muted">
+        Review the information below for this specific donation. You can choose to edit the details or return to the main list of donations.
+    </p>
+
     <dl class="row">
-        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.DATE)</dt>
-        <dd class="col-sm-10">@Html.DisplayFor(m => m.DATE)</dd>
+        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.DATE)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(m => m.DATE)</dd>
 
-        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.ITEM_COUNT)</dt>
-        <dd class="col-sm-10">@Html.DisplayFor(m => m.ITEM_COUNT)</dd>
+        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.ITEM_COUNT)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(m => m.ITEM_COUNT)</dd>
 
-        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.CATEGORY)</dt>
-        <dd class="col-sm-10">@Html.DisplayFor(m => m.CATEGORY)</dd>
+        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.CATEGORY)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(m => m.CATEGORY)</dd>
 
-        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.DESCRIPTION)</dt>
-        <dd class="col-sm-10">@Html.DisplayFor(m => m.DESCRIPTION)</dd>
+        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.DESCRIPTION)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(m => m.DESCRIPTION)</dd>
 
-        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.DONOR)</dt>
-        <dd class="col-sm-10">@Html.DisplayFor(m => m.DONOR)</dd>
+        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.DONOR)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(m => m.DONOR)</dd>
     </dl>
 
-    <a asp-action="Edit" asp-route-id="@Model.GOODS_DONATION_ID" class="btn btn-primary">Edit</a>
-    <a asp-action="Index" class="btn btn-secondary ms-2">Back to List</a>
+    <div class="mt-3 d-flex gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.GOODS_DONATION_ID" class="btn btn-primary">Edit Donation</a>
+        <a asp-action="Index" class="btn btn-secondary">Back to Donations List</a>
+    </div>
+
+    <div class="mt-3">
+        <p class="text-muted small">
+            Editing this donation allows you to correct or update any details such as item count, category, or description. Make sure all information is accurate before saving changes.
+        </p>
+    </div>
 </div>

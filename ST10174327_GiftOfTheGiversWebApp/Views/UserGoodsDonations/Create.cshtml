@@ -1,4 +1,4 @@
-﻿@model GoodsDonation
+﻿@model ST10174327_GiftOfTheGiversWebApp.Models.GoodsDonation
 
 @{
     ViewData["Title"] = "Donate Goods";
@@ -9,6 +9,10 @@
     <h2 class="mb-3">Donate Goods</h2>
     <hr />
 
+    <p class="text-muted">
+        Please fill out the form below to record your goods donation. Providing accurate details ensures that the donated items can be allocated efficiently to those in need.
+    </p>
+
     <div class="row justify-content-center">
         <div class="col-md-6">
             <form asp-action="Create" class="needs-validation" novalidate>
@@ -17,19 +21,19 @@
                 <input asp-for="USERNAME" type="hidden" value="@User.Identity.Name" />
 
                 <div class="mb-3">
-                    <label asp-for="DATE" class="form-label"></label>
+                    <label asp-for="DATE" class="form-label">Donation Date</label>
                     <input asp-for="DATE" class="form-control" type="date" />
                     <span asp-validation-for="DATE" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="ITEM_COUNT" class="form-label"></label>
+                    <label asp-for="ITEM_COUNT" class="form-label">Number of Items</label>
                     <input asp-for="ITEM_COUNT" class="form-control" type="number" min="1" />
                     <span asp-validation-for="ITEM_COUNT" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="CATEGORY" class="form-label"></label>
+                    <label asp-for="CATEGORY" class="form-label">Category</label>
                     <select asp-for="CATEGORY" class="form-select">
                         <option value="">-- Select a Category --</option>
                         <option>Cloths</option>
@@ -46,25 +50,48 @@
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="DESCRIPTION" class="form-label"></label>
-                    <textarea asp-for="DESCRIPTION" class="form-control" rows="3"></textarea>
+                    <label asp-for="DESCRIPTION" class="form-label">Description / Notes</label>
+                    <textarea asp-for="DESCRIPTION" class="form-control" rows="3" placeholder="Optional details about the items donated"></textarea>
                     <span asp-validation-for="DESCRIPTION" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="DONOR" class="form-label">Donor</label><br>
-                    <input type="radio" asp-for="DONOR" name="DONOR" value="Anonymous" /> Anonymous
-                    <input type="radio" asp-for="DONOR" name="DONOR" value="@User.Identity.Name" checked /> Myself
+                    <label class="form-label">Donor Information</label><br />
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" asp-for="DONOR" name="DONOR" value="Anonymous" />
+                        <label class="form-check-label">Anonymous</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" asp-for="DONOR" name="DONOR" value="@User.Identity.Name" checked />
+                        <label class="form-check-label">Myself</label>
+                    </div>
                     <span asp-validation-for="DONOR" class="text-danger"></span>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Donate</button>
-                <a asp-action="Index" class="btn btn-secondary ms-2">Back to List</a>
+                <button type="submit" class="btn btn-primary w-100">Submit Donation</button>
+                <a asp-action="Index" class="btn btn-secondary mt-2 w-100">Back to List</a>
             </form>
         </div>
+    </div>
+
+    <div class="mt-4">
+        <p class="text-muted small">
+            Once you submit this form, your donation will be logged in the system. Administrators will review and allocate the donated goods to the appropriate disaster relief or community aid programs. Ensure that the number of items and category selected accurately reflect what you are donating.
+        </p>
     </div>
 </div>
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script>
+        // Optional: Ensure item count is a positive integer
+        $(document).ready(function () {
+            $("input[name='ITEM_COUNT']").on("input", function () {
+                var val = parseInt($(this).val());
+                if (isNaN(val) || val < 1) {
+                    $(this).val("");
+                }
+            });
+        });
+    </script>
 }

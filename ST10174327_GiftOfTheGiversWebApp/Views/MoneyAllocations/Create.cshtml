@@ -1,4 +1,4 @@
-﻿@model MoneyAllocation
+﻿@model ST10174327_GiftOfTheGiversWebApp.Models.MoneyAllocation
 
 @{
     ViewData["Title"] = "Create Money Allocation";
@@ -7,8 +7,8 @@
 <div class="container my-5">
     <h1 class="display-5 mb-3">Create Money Allocation</h1>
 
-    <p>Remaining Money: <strong>@ViewBag.RemainingMoney.ToString("C")</strong></p>
-    <p>Total Allocated: <strong>@ViewBag.Total.ToString("C")</strong></p>
+    <p>Remaining Money: <strong>@(ViewBag.RemainingMoney?.ToString("C") ?? "R0.00")</strong></p>
+    <p>Total Allocated: <strong>@(ViewBag.Total?.ToString("C") ?? "R0.00")</strong></p>
 
     <div class="card shadow-sm">
         <div class="card-body">
@@ -16,22 +16,26 @@
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                 <div class="mb-3">
-                    <label asp-for="DisasterId" class="form-label">Select Disaster Aid</label>
-                    <select asp-for="DisasterId" asp-items="@ViewBag.DisasterTypes" class="form-select">
+                    <label for="DISASTER_ID" class="form-label">Select Disaster Aid</label>
+                    <select name="DISASTER_ID" asp-items="@ViewBag.DisasterTypes" class="form-select">
                         <option value="">-- Select Disaster --</option>
                     </select>
-                    <span asp-validation-for="DisasterId" class="text-danger"></span>
+                    <span asp-validation-for="DISASTER_ID" class="text-danger"></span>
                 </div>
 
                 <input type="hidden" asp-for="AidType" />
 
                 <div class="mb-3">
                     <label asp-for="AllocationAmount" class="form-label">Allocation Amount</label>
-                    <input asp-for="AllocationAmount" class="form-control" type="number" min="0" step="0.01" />
+                    <input asp-for="AllocationAmount" class="form-control" type="number" min="0" step="0.01"
+                           placeholder="Enter allocation amount" />
                     <span asp-validation-for="AllocationAmount" class="text-danger"></span>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100">Create Allocation</button>
+                <button type="submit" class="btn btn-primary w-100"
+                        @(ViewBag.RemainingMoney <= 0 ? "disabled" : "")>
+                    Create Allocation
+                </button>
             </form>
         </div>
     </div>

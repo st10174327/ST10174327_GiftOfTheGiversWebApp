@@ -1,8 +1,14 @@
 ﻿@model ST10174327_GiftOfTheGiversWebApp.Models.Volunteer
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<IdentityUser> UserManager
 
 @{
     ViewData["Title"] = "Volunteer Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Determine if current user is Admin or the owner of this volunteer record
+    var currentUsername = UserManager.GetUserName(User);
+    var isAuthorized = User.IsInRole("Admin") || Model.Email == currentUsername;
 }
 
 <div class="container mt-4">
@@ -19,9 +25,28 @@
         <dd class="col-sm-9">@Model.PhoneNumber</dd>
 
         <dt class="col-sm-3">Registration Date</dt>
-        <dd class="col-sm-9">@Model.RegistrationDate.ToShortDateString()</dd>
+        <dd class="col-sm-9">@Model.RegistrationDate.ToString("dd MMM yyyy")</dd>
+
+        <dt class="col-sm-3">Skills</dt>
+        <dd class="col-sm-9">@(string.IsNullOrEmpty(Model.Skills) ? "Not specified" : Model.Skills)</dd>
+
+        <dt class="col-sm-3">Status</dt>
+        <dd class="col-sm-9">
+            @if (Model.IsActive)
+            {
+                <span class="badge bg-success">Active</span>
+            }
+            else
+            {
+                <span class="badge bg-secondary">Inactive</span>
+            }
+        </dd>
     </dl>
 
-    <a asp-action="Edit" asp-route-id="@Model.VolunteerID" class="btn btn-primary">Edit</a>
+    @if (isAuthorized)
+    {
+        <a asp-action="Edit" asp-route-id="@Model.VolunteerID" class="btn btn-primary">Edit</a>
+    }
+
     <a asp-action="Index" class="btn btn-secondary ms-2">Back to List</a>
-</div>
+</div> 

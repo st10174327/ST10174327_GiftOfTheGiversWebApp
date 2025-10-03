@@ -5,40 +5,59 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
-    <h2>Register Volunteer</h2>
-    <hr />
+<div class="container mt-5">
+    <h2 class="mb-3 text-center">Register New Volunteer</h2>
+    <hr class="mb-4" />
 
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <form asp-action="Create" class="needs-validation" novalidate>
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <div class="card shadow-sm p-4">
+                <form asp-action="Create" method="post" class="needs-validation" novalidate>
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                <div class="mb-3">
-                    <label asp-for="Name" class="form-label"></label>
-                    <input asp-for="Name" class="form-control" />
-                    <span asp-validation-for="Name" class="text-danger"></span>
-                </div>
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label">Full Name</label>
+                        <input asp-for="Name" class="form-control" placeholder="Enter full name" required />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
 
-                <div class="mb-3">
-                    <label asp-for="Email" class="form-label"></label>
-                    <input asp-for="Email" class="form-control" type="email" />
-                    <span asp-validation-for="Email" class="text-danger"></span>
-                </div>
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label">Email Address</label>
+                        <input asp-for="Email" class="form-control" type="email" placeholder="Enter email" required />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
 
-                <div class="mb-3">
-                    <label asp-for="PhoneNumber" class="form-label"></label>
-                    <input asp-for="PhoneNumber" class="form-control" type="tel" />
-                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-                </div>
+                    <div class="mb-3">
+                        <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                        <input asp-for="PhoneNumber" class="form-control" type="tel" placeholder="Enter phone number" required />
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
 
-                <button type="submit" class="btn btn-primary">Register</button>
-                <a asp-action="Index" class="btn btn-secondary ms-2">Back to List</a>
-            </form>
+                    <button type="submit" class="btn btn-primary w-100">Register Volunteer</button>
+                    <a asp-action="Index" class="btn btn-secondary w-100 mt-2">Back to List</a>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script>
+        // Bootstrap form validation
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+    </script>
 }

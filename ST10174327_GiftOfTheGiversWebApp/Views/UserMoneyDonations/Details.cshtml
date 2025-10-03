@@ -1,8 +1,13 @@
 ﻿@model ST10174327_GiftOfTheGiversWebApp.Models.MoneyDonation
 
 <div class="container mt-4">
-    <h3>Donation Details</h3>
+    <h3 class="mb-3">Donation Details</h3>
     <hr />
+
+    <p class="text-muted">
+        Below are the details of the monetary donation. You can choose to edit this record or return to the list of all donations.
+    </p>
+
     <dl class="row">
         <dt class="col-sm-2">@Html.DisplayNameFor(m => m.DATE)</dt>
         <dd class="col-sm-10">@Html.DisplayFor(m => m.DATE)</dd>
@@ -14,6 +19,12 @@
         <dd class="col-sm-10">@Html.DisplayFor(m => m.DONOR)</dd>
     </dl>
 
-    <a asp-action="Edit" asp-route-id="@Model.MONEY_DONATION_ID" class="btn btn-primary">Edit</a>
-    <a asp-action="Index" class="btn btn-secondary ms-2">Back to List</a>
+    <div class="mt-3">
+        <a asp-action="Edit" asp-route-id="@Model.MONEY_DONATION_ID" class="btn btn-primary me-2">Edit</a>
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+
+    <p class="text-muted mt-3">
+        You can edit the donation if you need to correct any information. Otherwise, click "Back to List" to return without making changes.
+    </p>
 </div>

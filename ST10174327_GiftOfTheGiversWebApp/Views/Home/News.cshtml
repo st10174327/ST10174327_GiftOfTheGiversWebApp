@@ -2,61 +2,148 @@
     ViewData["Title"] = "News";
 }
 
+<style>
+    /* Card hover effect */
+    .news-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Image zoom on hover */
+        .news-card img {
+            transition: transform 0.3s ease;
+        }
+
+        .news-card:hover img {
+            transform: scale(1.05);
+        }
+</style>
+
 <div class="container py-5">
-    <h1 class="mb-4 text-center fw-bold">Latest News</h1>
+
     <p class="text-muted text-center mb-5">
         Explore our latest initiatives, relief missions, and inspiring stories of resilience.
     </p>
 
-    <div class="row g-4">
+    <!-- News & Articles Section -->
+    <div class="container my-5">
+        <h3 class="fw-bold text-center mb-4">Latest News</h3>
+        <div class="row g-4">
 
-        <!-- News Item 1 -->
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm">
-                <img src="https://www.goodthingsguy.com/wp-content/uploads/2021/07/mastercard-gift-of-the-givers.jpeg"
-                     class="card-img-top" alt="Disaster Relief" />
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title fw-bold">Disaster Relief Mission</h5>
-                    <p class="card-text flex-grow-1">
-                        Our teams provided urgent aid to families impacted by severe flooding,
-                        distributing food, water, and medical supplies.
-                    </p>
-                    <a href="https://www.instagram.com/reel/DPOTneaDvbz/?utm_source=ig_web_button_share_sheet"
-                       target="_blank" class="btn btn-outline-primary mt-auto">See on Instagram</a>
+            <!-- News Card 1 -->
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="card shadow-sm border-0 h-100 news-card">
+                    <img src="~/images/news1.jpg" class="card-img-top rounded"
+                         alt="Gift of the Givers Turns 30"
+                         style="height:200px; object-fit:cover;">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold">Gift of the Givers Turns 30</h5>
+                        <p class="card-text text-muted flex-grow-1">
+                            Imtiaz Sooliman reflects on South Africa's future crisis aid and the importance of humanitarian support.
+                        </p>
+                        <a href="https://www.news24.com/southafrica/news/gift-of-the-givers-turns-30-imtiaz-sooliman-on-sas-future-crisis-aid-and-emotional-distancing-20220806"
+                           target="_blank" class="btn btn-warning mt-3 w-100 shadow-sm">
+                            Read More
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- News Item 2 -->
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm">
-                <img src="https://via.placeholder.com/600x400" class="card-img-top" alt="Community March" />
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title fw-bold">Coal Fueling Genocide Protest</h5>
-                    <p class="card-text flex-grow-1">
-                        Thousands joined the mass march in Cape Town to protest ongoing genocide in Gaza.
-                        Citizens demanded that the South African government take a stronger stance.
-                    </p>
-                    <a href="https://www.instagram.com/reel/DNIAarKxGeg/?utm_source=ig_web_button_share_sheet"
-                       target="_blank" class="btn btn-outline-primary mt-auto">See on Instagram</a>
+            <!-- News Card 2 -->
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="card shadow-sm border-0 h-100 news-card">
+                    <img src="~/images/news2.jpg" class="card-img-top rounded"
+                         alt="Aid to KZN Flood Victims"
+                         style="height:200px; object-fit:cover;">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold">Aid to KZN Flood Victims</h5>
+                        <p class="card-text text-muted flex-grow-1">
+                            Engen and Gift of the Givers provide essential support to communities affected by the KwaZulu-Natal floods.
+                        </p>
+                        <a href="https://www.engineeringnews.co.za/article/engen-and-gift-of-the-givers-provide-vital-aid-to-kzn-flood-victims-2025-03-03"
+                           target="_blank" class="btn btn-warning mt-3 w-100 shadow-sm">
+                            Read More
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- News Item 3 -->
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm">
-                <img src="https://via.placeholder.com/600x400" class="card-img-top" alt="Protest Highlights" />
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title fw-bold">Mass March Highlights</h5>
-                    <p class="card-text flex-grow-1">
-                        Highlights from the protest against coal trade with Israel, showing strong community participation.
-                    </p>
-                    <a href="https://www.instagram.com/p/DPOEWpAj_kD/?utm_source=ig_web_button_share_sheet"
-                       target="_blank" class="btn btn-outline-primary mt-auto">See on Instagram</a>
+            <!-- News Card 3 -->
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="card shadow-sm border-0 h-100 news-card">
+                    <img src="~/images/news3.jpg" class="card-img-top rounded"
+                         alt="Disaster Relief Efforts"
+                         style="height:200px; object-fit:cover;">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold">Disaster Relief Efforts</h5>
+                        <p class="card-text text-muted flex-grow-1">
+                            Highlighting recent disaster relief efforts across South Africa and the impact on affected communities.
+                        </p>
+                        <a href="#" target="_blank" class="btn btn-warning mt-3 w-100 shadow-sm">
+                            Read More
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
 
+            <!-- News Card 4 -->
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="card shadow-sm border-0 h-100 news-card">
+                    <img src="~/images/news4.jpg" class="card-img-top rounded"
+                         alt="Community Projects"
+                         style="height:200px; object-fit:cover;">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold">Community Projects</h5>
+                        <p class="card-text text-muted flex-grow-1">
+                            Showcasing ongoing community projects and how local engagement transforms lives.
+                        </p>
+                        <a href="#" target="_blank" class="btn btn-warning mt-3 w-100 shadow-sm">
+                            Read More
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
+
+    <!-- Featured Instagram Section -->
+    <div class="container my-5">
+        <h3 class="fw-bold text-center mb-4">Featured Content</h3>
+        <div class="row g-4 justify-content-center">
+
+            <!-- Instagram Embed 1 -->
+            <div class="col-12 col-md-6">
+                <blockquote class="instagram-media"
+                            data-instgrm-permalink="https://www.instagram.com/reel/DK_3TPQS3P6/?utm_source=ig_web_copy_link"
+                            data-instgrm-version="14"
+                            style="background:#FFF; border:0; border-radius:12px; margin:0 auto; max-width:100%; padding:0;">
+                </blockquote>
+            </div>
+
+            <!-- Instagram Embed 2 -->
+            <div class="col-12 col-md-6">
+                <blockquote class="instagram-media"
+                            data-instgrm-permalink="https://www.instagram.com/p/DNDgxCYunrm/"
+                            data-instgrm-version="14"
+                            style="background:#FFF; border:0; border-radius:12px; margin:0 auto; max-width:100%; padding:0;">
+                </blockquote>
+            </div>
+
+        </div>
+    </div>
+
+    <script async src="//www.instagram.com/embed.js"></script>
+
+    <!-- Back to Home Button -->
+    <div class="text-center mb-4">
+        <a asp-controller="Home" asp-action="Home" class="btn btn-primary shadow-sm">
+            Back to Home
+        </a>
+    </div>
+
 </div>

@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using ST10174327_GiftOfTheGiversWebApp.Models;
-using ST10174327_GiftOfTheGiversWebApp;
 using ST10174327_GiftOfTheGiversWebApp.Data;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using ST10174327_GiftOfTheGiversWebApp.Models;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace ST10174327_GiftOfTheGiversWebApp.Controllers
 {
+    [Authorize] // All actions require login
     public class UserDisastersController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -23,38 +18,22 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         {
             _context = context;
         }
-        // GET: Disasters/Details/5
-        [Authorize]
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.Disaster == null)
-            {
-                return NotFound();
-            }
 
-            var disaster = await _context.Disaster
-                .FirstOrDefaultAsync(m => m.DISTATER_ID == id);
-            if (disaster == null)
-            {
-                return NotFound();
-            }
-
-            return View(disaster);
-        }
-        [Authorize]
+        // GET: UserDisasters
         public async Task<IActionResult> Index()
         {
-            // Check if the user is authenticated
-            if (!User.Identity.IsAuthenticated)
+            string? currentUsername = User.Identity?.Name;
+
+            if (User.IsInRole("Admin"))
             {
-                // User is not logged in, handle this case as needed (e.g., redirect to login)
-                return RedirectToAction("Login", "Account");
+                // Admin sees all disasters
+                return View(await _context.Disaster.ToListAsync());
             }
 
-            // Get the current logged-in username
-            string currentUsername = User.Identity.Name;
+            if (string.IsNullOrEmpty(currentUsername))
+                return RedirectToAction("Login", "Account");
 
-            // Query the data for the current username
+            // Normal user sees only their disasters
             var userDisasters = await _context.Disaster
                 .Where(d => d.USERNAME == currentUsername)
                 .ToListAsync();
@@ -62,127 +41,111 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             return View(userDisasters);
         }
 
-        // GET: UserDisasters/Create
-        [Authorize]
-        public IActionResult Create()
+        // GET: UserDisasters/Details/5
+        public async Task<IActionResult> Details(int? id)
         {
-            var currentDate = DateTime.Now.Date;
-            var tomorrow = currentDate.AddDays(1);
+            if (id == null) return NotFound();
 
-            var disaster = new Disaster
-            {
-                STARTDATE = currentDate,
-                ENDDATE = tomorrow
-            };
+            var disaster = await _context.Disaster.FirstOrDefaultAsync(m => m.DISASTER_ID == id);
+            if (disaster == null) return NotFound();
+
+            if (!User.IsInRole("Admin") && disaster.USERNAME != User.Identity?.Name)
+                return Forbid(); // prevent other users from snooping
 
             return View(disaster);
         }
+
+        // GET: UserDisasters/Create
+        public IActionResult Create()
+        {
+            return View(new Disaster
+            {
+                STARTDATE = DateTime.Now.Date,
+                ENDDATE = DateTime.Now.Date.AddDays(1)
+            });
+        }
+
+        // POST: UserDisasters/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize] //any logged in user
-        public async Task<IActionResult> Create([Bind("DISTATER_ID,USERNAME,STARTDATE,ENDDATE,LOCATION,AID_TYPE,IsActive")] Disaster disaster)
+        public async Task<IActionResult> Create([Bind("STARTDATE,ENDDATE,LOCATION,AID_TYPE")] Disaster disaster)
         {
-            if (ModelState.IsValid)
+            string? currentUsername = User.Identity?.Name;
+            if (string.IsNullOrEmpty(currentUsername))
+                return RedirectToAction("Login", "Account");
+
+            if (!ModelState.IsValid) return View(disaster);
+
+            if (disaster.STARTDATE < DateTime.Now.Date)
             {
-                // Get the current logged-in username
-                string currentUsername = User.Identity.Name;
-
-                // Set the username of the disaster to the current user's username
-                disaster.USERNAME = currentUsername;
-
-                // Check if the start date is before the current date
-                if (disaster.STARTDATE < DateTime.Now.Date)
-                {
-                    ModelState.AddModelError("STARTDATE", "Start date cannot be earlier than today.");
-                    return View(disaster);
-                }
-
-                // Check if the current date is in between the start and end dates
-                if (disaster.STARTDATE <= DateTime.Now.Date && DateTime.Now.Date <= disaster.ENDDATE)
-                {
-                    disaster.IsActive = 1; // 1 represents true in your integer-based flag
-                }
-                else
-                {
-                    disaster.IsActive = 0; // 0 represents false in your integer-based flag
-                }
-
-                if (disaster.ENDDATE < disaster.STARTDATE.Value.Date.AddDays(1))
-                {
-                    ModelState.AddModelError("ENDDATE", "End date must be at least one day after the start date.");
-                    return View(disaster);
-                }
-
-                // Now add the disaster with MoneyAllocation to the context.
-                _context.Add(disaster);
-
-                // Save changes to the database.
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Index));
+                ModelState.AddModelError("STARTDATE", "Start date cannot be earlier than today.");
+                return View(disaster);
             }
 
-            return View(disaster);
+            if (disaster.ENDDATE <= disaster.STARTDATE)
+            {
+                ModelState.AddModelError("ENDDATE", "End date must be after start date.");
+                return View(disaster);
+            }
+
+            // assign username & active state
+            disaster.USERNAME = currentUsername;
+            disaster.IsActive = (disaster.STARTDATE <= DateTime.Now && DateTime.Now <= disaster.ENDDATE) ? 1 : 0;
+
+            _context.Add(disaster);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: UserDisasters/Edit/5
-        [Authorize(Roles = "Admin")] //only admin
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Disaster == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var disaster = await _context.Disaster.FindAsync(id);
+            if (disaster == null) return NotFound();
 
-            if (disaster == null || disaster.USERNAME != @User.Identity.Name)
-            {
-                // Either the disaster doesn't exist or it doesn't belong to the current user
-                return NotFound();
-            }
+            if (!User.IsInRole("Admin") && disaster.USERNAME != User.Identity?.Name)
+                return Forbid();
 
             return View(disaster);
         }
 
         // POST: UserDisasters/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("DISTATER_ID,USERNAME,STARTDATE,ENDDATE,LOCATION,AID_TYPE")] Disaster disaster)
+        [Authorize(Roles = "Admin,User")]
+        public async Task<IActionResult> Edit(int id, [Bind("DISTATER_ID,STARTDATE,ENDDATE,LOCATION,AID_TYPE")] Disaster disaster)
         {
-            if (id != disaster.DISTATER_ID)
-            {
-                return NotFound();
-            }
-
             var existingDisaster = await _context.Disaster.FindAsync(id);
+            if (existingDisaster == null) return NotFound();
 
-            if (existingDisaster == null || existingDisaster.USERNAME != @User.Identity.Name)
-            {
-                // Either the disaster doesn't exist or it doesn't belong to the current user
-                return NotFound();
-            }
+            if (!User.IsInRole("Admin") && existingDisaster.USERNAME != User.Identity?.Name)
+                return Forbid();
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(disaster);
+                    // update only allowed fields
+                    existingDisaster.STARTDATE = disaster.STARTDATE;
+                    existingDisaster.ENDDATE = disaster.ENDDATE;
+                    existingDisaster.LOCATION = disaster.LOCATION;
+                    existingDisaster.AID_TYPE = disaster.AID_TYPE;
+
+                    // recalc active flag
+                    existingDisaster.IsActive = (existingDisaster.STARTDATE <= DateTime.Now && DateTime.Now <= existingDisaster.ENDDATE) ? 1 : 0;
+
+                    _context.Update(existingDisaster);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!DisasterExists(disaster.DISTATER_ID))
-                    {
+                    if (!_context.Disaster.Any(e => e.DISASTER_ID == id))
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -190,52 +153,35 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         }
 
         // GET: UserDisasters/Delete/5
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Disaster == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var disaster = await _context.Disaster
-                .FirstOrDefaultAsync(m => m.DISTATER_ID == id);
+            var disaster = await _context.Disaster.FirstOrDefaultAsync(m => m.DISASTER_ID == id);
+            if (disaster == null) return NotFound();
 
-            if (disaster == null || disaster.USERNAME != User.Identity.Name)
-            {
-                // Either the disaster doesn't exist or it doesn't belong to the current user
-                return NotFound();
-            }
+            if (!User.IsInRole("Admin") && disaster.USERNAME != User.Identity?.Name)
+                return Forbid();
 
             return View(disaster);
         }
 
         // POST: UserDisasters/Delete/5
         [HttpPost, ActionName("Delete")]
-        [Authorize (Roles ="Admin")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Disaster   == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Disaster'  is null.");
-            }
-
             var disaster = await _context.Disaster.FindAsync(id);
+            if (disaster == null) return NotFound();
 
-            if (disaster == null || disaster.USERNAME != User.Identity.Name)
-            {
-                // Either the disaster doesn't exist or it doesn't belong to the current user
-                return NotFound();
-            }
+            if (!User.IsInRole("Admin") && disaster.USERNAME != User.Identity?.Name)
+                return Forbid();
 
             _context.Disaster.Remove(disaster);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-        private bool DisasterExists(int id)
-        {
-            return _context.Disaster.Any(e => e.DISTATER_ID == id && e.USERNAME == @User.Identity.Name);
         }
     }
 }

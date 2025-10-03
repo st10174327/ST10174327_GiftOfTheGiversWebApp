@@ -1,40 +1,70 @@
-/* =============================== 
+/* ===============================
+   ROOT VARIABLES
+================================ */
+:root {
+    --primary-green: #2E8B57;
+    --dark-green: #1A5D3A;
+    --light-green: #4CAF50;
+    --mint-green: #98FB98;
+    --forest-green: #228B22;
+    --sun-yellow: #FFD700;
+    --border-gold: #f7c343; /* updated border color */
+    --charcoal: #36454F;
+    --white: #FFFFFF;
+    --light-gray: #F8F9FA;
+    --text-dark: #2C3E50;
+    --text-light: #7F8C8D;
+    --shadow: 0 4px 20px rgba(46, 139, 87, 0.15);
+    --shadow-hover: 0 8px 30px rgba(46, 139, 87, 0.25);
+    --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+    --border-radius: 16px;
+    --border-radius-sm: 8px;
+}
+
+/* ===============================
    GLOBAL STYLES
 ================================ */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f8f9fa;
+    font-family: 'Poppins', Arial, sans-serif;
+    line-height: 1.7;
+    color: var(--text-dark);
+    background: linear-gradient(135deg, var(--light-gray) 0%, var(--white) 100%);
+    overflow-x: hidden;
     margin: 0;
     padding: 0;
-    color: #333;
 }
 
 a {
     text-decoration: none;
     transition: color 0.3s ease;
+    color: var(--primary-green);
 }
+
+    a:hover {
+        color: var(--sun-yellow);
+    }
 
 /* ===============================
    NAVBAR
 ================================ */
 .navbar {
-    background-color: #1F8A70;
+    background-color: var(--primary-green);
     padding: 0.8rem 1.2rem;
 }
 
 .navbar-brand,
 .navbar-nav .nav-link {
-    color: #FFFFFF !important;
+    color: var(--white) !important;
     font-weight: 600;
 }
 
     .navbar-nav .nav-link:hover {
-        color: #FFD700 !important; /* gold hover */
+        color: var(--sun-yellow) !important;
     }
 
 .navbar .btn {
-    background-color: rgb(33, 45, 211);
-    color: #FFFFFF !important;
+    background-color: var(--forest-green);
+    color: var(--white) !important;
     font-weight: 600;
     border: none;
     border-radius: 0.5rem;
@@ -43,15 +73,15 @@ a {
 }
 
     .navbar .btn:hover {
-        background-color: #1F8A70;
-        color: #FFFFFF !important;
+        background-color: var(--dark-green);
+        color: var(--white) !important;
     }
 
 /* ===============================
    HEADERS
 ================================ */
 h1, h2, h3, h4, h5, h6 {
-    color: #1F8A70;
+    color: var(--primary-green);
     font-weight: 700;
 }
 
@@ -59,28 +89,28 @@ h1, h2, h3, h4, h5, h6 {
    BUTTONS
 ================================ */
 .btn {
-    border: none;
     border-radius: 0.5rem;
     padding: 0.6rem 1.2rem;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    background-color: rgb(33, 45, 211);
-    color: #FFFFFF !important;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    background-color: var(--forest-green);
+    color: var(--white) !important;
+    box-shadow: var(--shadow);
+    border: 2px solid var(--border-gold);
 }
 
     .btn:hover {
-        background-color: #1F8A70;
-        color: #FFFFFF !important;
+        background-color: var(--dark-green);
+        color: var(--white) !important;
         transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        box-shadow: var(--shadow-hover);
     }
 
     .btn:active {
-        background-color: #0F3F30;
-        color: #FFFFFF !important;
+        background-color: var(--dark-green);
+        color: var(--white) !important;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         transform: translateY(0);
     }
@@ -89,8 +119,8 @@ h1, h2, h3, h4, h5, h6 {
    FOOTER
 ================================ */
 footer {
-    background-color: #145345;
-    color: #FFFFFF;
+    background-color: var(--primary-green);
+    color: var(--white);
     padding: 2rem 0;
     text-align: center;
 }
@@ -98,7 +128,7 @@ footer {
     footer h5,
     footer p,
     footer a {
-        color: #FFFFFF !important;
+        color: var(--white) !important;
         margin-bottom: 0.5rem;
     }
 
@@ -110,74 +140,49 @@ footer {
    CARDS / CONTENT BLOCKS
 ================================ */
 .card {
-    border: none;
+    border: 2px solid var(--border-gold);
     border-radius: 0.75rem;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    box-shadow: var(--shadow);
     margin-bottom: 1.5rem;
 }
 
 .card-title {
-    color: #1F8A70;
+    color: var(--primary-green);
     font-weight: 700;
 }
 
 .card-text {
-    color: #333;
-}
-
-/* ===============================
-   UTILITIES
-================================ */
-.text-green {
-    color: #1F8A70 !important;
-}
-
-.bg-green {
-    background-color: #1F8A70 !important;
-    color: #FFFFFF !important;
-}
-
-.text-white {
-    color: #FFFFFF !important;
+    color: var(--text-dark);
 }
 
 /* ===============================
    FORMS / INPUTS
 ================================ */
 .form-control {
-    display: block;
     width: 100%;
     padding: 0.375rem 0.75rem;
     font-size: 1rem;
     font-weight: 400;
-    line-height: 1.5;
-    color: #FFFFFF; /* white text */
-    background-color: transparent; /* transparent background */
-    background-clip: padding-box;
-    border: 1px solid #1F8A70; /* green border */
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
+    color: var(--text-dark);
+    background-color: transparent;
+    border: 1px solid var(--border-gold);
     border-radius: 0.25rem;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
     .form-control:focus {
-        color: #FFFFFF;
-        background-color: rgba(31,138,112,0.1); /* subtle green tint on focus */
-        border-color: #1F8A70;
-        box-shadow: 0 0 0 0.2rem rgba(31,138,112,0.25); /* subtle green glow */
+        border-color: var(--forest-green);
+        box-shadow: 0 0 0 0.2rem rgba(34,139,34,0.25);
     }
 
 /* ===============================
    TABLES
 ================================ */
-/* Tables with green borders and white text */
 .table,
 .table-dark,
 .table-green {
-    border: 2px solid #1F8A70; /* outer table border */
-    color: #FFFFFF !important; /* white text */
+    border: 2px solid var(--border-gold);
+    color: var(--white) !important;
     border-collapse: collapse;
 }
 
@@ -187,16 +192,208 @@ footer {
     .table-dark td,
     .table-green th,
     .table-green td {
-        border: 1px solid #1F8A70; /* green cell borders */
-        color: #FFFFFF !important; /* white text */
-        background-color: #1F8A70; /* preserve existing background */
+        border: 1px solid var(--border-gold);
+        color: var(--white) !important;
+        background-color: var(--primary-green);
         padding: 0.75rem;
         text-align: left;
     }
 
-    /* Optional hover effect for all tables */
     .table tbody tr:hover,
     .table-dark tbody tr:hover,
     .table-green tbody tr:hover {
-        background-color: rgba(31,138,112,0.1); /* subtle green hover */
+        background-color: rgba(46, 139, 87, 0.2);
     }
+
+/* ===============================
+   HERO SECTION
+================================ */
+.hero {
+    padding: 180px 5% 100px;
+    background: linear-gradient(135deg, rgba(46, 139, 87, 0.1) 0%, rgba(152, 251, 152, 0.05) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.hero-text h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, var(--dark-green), var(--primary-green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-text p {
+    font-size: 1.3rem;
+    color: var(--text-light);
+    margin-bottom: 2.5rem;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.hero-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow-hover);
+    border: 1px solid var(--border-gold);
+    transform: rotate(3deg);
+    transition: var(--transition);
+}
+
+    .hero-card:hover {
+        transform: rotate(0deg) translateY(-10px);
+    }
+
+/* ===============================
+   SECTIONS / FEATURES
+================================ */
+.section {
+    padding: 100px 5%;
+}
+
+.section-header {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 4rem;
+}
+
+.section-title {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--dark-green);
+    margin-bottom: 1rem;
+    position: relative;
+    display: inline-block;
+}
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: var(--border-gold);
+        border-radius: 2px;
+    }
+
+.section-subtitle {
+    font-size: 1.2rem;
+    color: var(--text-light);
+    line-height: 1.6;
+}
+
+.features-grid,
+.services-grid,
+.testimonial-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.feature-card,
+.service-card,
+.testimonial-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    border: 2px solid var(--border-gold);
+    transition: var(--transition);
+}
+
+    .feature-card:hover,
+    .service-card:hover,
+    .testimonial-card:hover {
+        transform: translateY(-10px);
+        box-shadow: var(--shadow-hover);
+    }
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--mint-green), var(--forest-green));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--white);
+    margin: 0 auto 1.5rem;
+}
+
+.testimonial-text {
+    font-style: italic;
+    color: var(--text-dark);
+    margin-bottom: 1.5rem;
+}
+
+/* ===============================
+   UTILITIES
+================================ */
+.text-green {
+    color: var(--primary-green) !important;
+}
+
+.bg-green {
+    background-color: var(--primary-green) !important;
+    color: var(--white) !important;
+}
+
+.text-white {
+    color: var(--white) !important;
+}
+
+/* ===============================
+   RESPONSIVE DESIGN
+================================ */
+@media (max-width: 1024px) {
+    .hero-content {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+        text-align: center;
+    }
+
+    .hero-text h1 {
+        font-size: 3rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0.5rem 1rem;
+    }
+
+    .hero-text h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero-card {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-text h1 {
+        font-size: 2rem;
+    }
+}

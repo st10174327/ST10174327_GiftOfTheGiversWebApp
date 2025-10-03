@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using ST10174327_GiftOfTheGiversWebApp.Models;
 using ST10174327_GiftOfTheGiversWebApp.Data;
+using ST10174327_GiftOfTheGiversWebApp.Models;
 
 namespace ST10174327_GiftOfTheGiversWebApp.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class GoodsPurchasesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -19,104 +19,92 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             _context = context;
         }
 
+        // GET: GoodsPurchases
         public async Task<IActionResult> Index()
         {
-            // Retrieve the first record from the Money table
-            Money firstMoneyRecord = _context.Money.FirstOrDefault();
-
-            // Calculate available money from the first record
-            decimal availableMoney = firstMoneyRecord != null ? firstMoneyRecord.RemainingMoney : 0;
+            var firstMoneyRecord = await _context.Money.FirstOrDefaultAsync();
+            decimal availableMoney = firstMoneyRecord?.RemainingMoney ?? 0;
             ViewBag.AvailableMoney = availableMoney;
 
-            return View(await _context.GoodsPurchase.ToListAsync());
+            var purchases = await _context.GoodsPurchase.ToListAsync();
+            return View(purchases);
         }
 
-        public IActionResult Create()
+        // GET: GoodsPurchases/Create
+        public async Task<IActionResult> Create()
         {
-            // Retrieve the first record from the Money table
-            Money firstMoneyRecord = _context.Money.FirstOrDefault();
-
-            // Calculate available money from the first record
-            decimal availableMoney = firstMoneyRecord != null ? firstMoneyRecord.RemainingMoney : 0;
-            ViewBag.AvailableMoney = availableMoney;
-
-            // Prepare the list of available categories
-            var categories = _context.GoodsDonation.Select(g => g.CATEGORY).Distinct();
-            ViewBag.Categories = new SelectList(categories);
-
+            await LoadViewDataAsync();
             return View();
         }
+
+        // POST: GoodsPurchases/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("GoodsPurchaseID, GoodsPurchasePrice, ITEM_COUNT, GoodsTotalPrice, CATEGORY")] GoodsPurchase goodsPurchase, string category)
+        public async Task<IActionResult> Create([Bind("GoodsPurchaseID,GoodsPurchasePrice,ITEM_COUNT,CATEGORY")] GoodsPurchase goodsPurchase)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                // Retrieve the first record from the Money table
-                Money firstMoneyRecord = _context.Money.FirstOrDefault();
-
-                if (firstMoneyRecord != null)
-                {
-                    decimal availableMoney = firstMoneyRecord.RemainingMoney;
-                    decimal totalCost = goodsPurchase.GoodsPurchasePrice * goodsPurchase.ITEM_COUNT;
-
-                    if (totalCost <= availableMoney)
-                    {
-                        // Check if the category already exists in the GoodsInventory
-                        var inventoryItem = _context.GoodsInventory.FirstOrDefault(g => g.CATEGORY == goodsPurchase.CATEGORY);
-
-                        if (inventoryItem != null)
-                        {
-                            // Update the item count in the existing record
-                            inventoryItem.ITEM_COUNT += goodsPurchase.ITEM_COUNT;
-                        }
-                        else
-                        {
-                            // Create a new record in the GoodsInventory
-                            _context.GoodsInventory.Add(new GoodsInventory
-                            {
-                                CATEGORY = goodsPurchase.CATEGORY,
-                                ITEM_COUNT = goodsPurchase.ITEM_COUNT
-                            });
-                        }
-
-                        // Subtract the totalCost from available money
-                        availableMoney -= totalCost;
-
-                        // Calculate the GoodsTotalPrice
-                        goodsPurchase.GoodsTotalPrice = totalCost;
-
-                        // Update the remaining money in the Money table
-                        firstMoneyRecord.RemainingMoney = availableMoney;
-
-                        // Add the purchase details to the database
-                        _context.GoodsPurchase.Add(goodsPurchase);
-
-                        // After saving the purchase, update the GoodsAllocation list
-                        var goodsAllocation = _context.GoodsAllocation.ToList();
-                        ViewBag.GoodsAllocationList = new SelectList(goodsAllocation, "CATEGORY", "ITEM_COUNT");
-
-                        await _context.SaveChangesAsync();
-
-                        return RedirectToAction(nameof(Index));
-                    }
-                    else
-                    {
-                        // Construct the custom error message with the total cost and available money
-                        string errorMessage = $"The calculated total cost {totalCost:C} exceeds the available money {availableMoney:C}.";
-
-                        // Add the error message to the ModelState
-                        ModelState.AddModelError("ITEM_COUNT", errorMessage);
-                    }
-                }
+                await LoadViewDataAsync();
+                return View(goodsPurchase);
             }
 
-            // If the model is invalid, reload the list of categories
-            var categories = _context.GoodsDonation.Select(g => g.CATEGORY).Distinct();
-            ViewBag.Categories = new SelectList(categories);
+            var firstMoneyRecord = await _context.Money.FirstOrDefaultAsync();
+            if (firstMoneyRecord == null)
+            {
+                ModelState.AddModelError("", "No money record found. Cannot make purchase.");
+                await LoadViewDataAsync();
+                return View(goodsPurchase);
+            }
 
-            return View(goodsPurchase);
+            decimal totalCost = goodsPurchase.GoodsTotalPrice;
+
+            if (totalCost > firstMoneyRecord.RemainingMoney)
+            {
+                ModelState.AddModelError("ITEM_COUNT", $"Total cost {totalCost:C} exceeds available money {firstMoneyRecord.RemainingMoney:C}.");
+                await LoadViewDataAsync();
+                return View(goodsPurchase);
+            }
+
+            // Update or create inventory record
+            var inventoryItem = await _context.GoodsInventory.FirstOrDefaultAsync(g => g.CATEGORY == goodsPurchase.CATEGORY);
+            if (inventoryItem != null)
+            {
+                inventoryItem.ITEM_COUNT += goodsPurchase.ITEM_COUNT;
+                _context.GoodsInventory.Update(inventoryItem);
+            }
+            else
+            {
+                _context.GoodsInventory.Add(new GoodsInventory
+                {
+                    CATEGORY = goodsPurchase.CATEGORY,
+                    ITEM_COUNT = goodsPurchase.ITEM_COUNT
+                });
+            }
+
+            // Update money
+            firstMoneyRecord.RemainingMoney -= totalCost;
+            _context.Money.Update(firstMoneyRecord);
+
+            // Add purchase (no need to assign GoodsTotalPrice explicitly)
+            _context.GoodsPurchase.Add(goodsPurchase);
+
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Goods purchased successfully!";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // Utility: Load ViewData for dropdowns and money info
+        private async Task LoadViewDataAsync()
+        {
+            var firstMoneyRecord = await _context.Money.FirstOrDefaultAsync();
+            ViewBag.AvailableMoney = firstMoneyRecord?.RemainingMoney ?? 0;
+
+            var categories = await _context.GoodsDonation
+                .Select(g => g.CATEGORY)
+                .Distinct()
+                .ToListAsync();
+            ViewBag.Categories = new SelectList(categories);
         }
     }
 }
-
