@@ -4,7 +4,99 @@
 
 A web-based donation management system developed using **ASP.NET Core 8.0**, **Entity Framework Core**, and **Identity**. This application allows administrators and users to manage money and goods donations, track disasters, and maintain donation records securely.
 
+
+Default Admin Login
+	•	Email: admin@admin.com
+	•	Password: Admin@123
+
+
 ---
+Gift of the Givers Web Application
+
+Student: ST10174327 Cynthia Panzu
+Module: Applied Programming 
+
+
+Project Overview
+
+The Gift of the Givers Web Application is an ASP.NET Core–based humanitarian platform that enables disaster relief operations through a structured digital solution. Users can register, log in, report disasters, donate goods, donate money, and sign up as volunteers. The application also features an Admin dashboard, allowing administrators to manage volunteers, create and assign tasks, and monitor disaster relief activities.
+
+The system was developed with a strong focus on Azure DevOps integration, utilizing Git repositories, branching strategies, and CI/CD pipelines.
+
+Azure DevOps Repository:
+GiftOfTheGivers-WebApp (Azure DevOps)
+
+
+Git Repositories
+
+Repository Setup
+	•	Repository Created: GiftOfTheGivers-WebApp
+	•	Branching Strategy: Gitflow model implemented
+	•	Branches:
+	•	main (production)
+	•	develop (integration)
+	•	feature/volunteer-management
+	•	feature/donation-system
+	•	feature/user-authentication
+
+Collaboration Features
+	•	Public repository access enabled for instructor review.
+	•	Organized and structured ASP.NET Core solution with clear separation of concerns.
+
+Evidence of Work (Commits, Branches, Repo Structure):
+	•	Screenshots of commits and branch hierarchy are included in the submission.
+
+Source Code Quality
+
+Project Architecture
+	•	ASP.NET Core MVC pattern implemented.
+	•	Structured folder hierarchy ensuring maintainability and scalability.
+
+Build Pipelines
+
+Pipeline Configuration
+	•	CI/CD implemented using Azure Pipelines with YAML configuration.
+	•	Pipeline stages:
+	1.	Restore NuGet packages
+	2.	Build solution
+	3.	Run unit tests
+	4.	Publish build artifacts
+	5.	Deploy to Azure App Service
+
+Challenge: Encountered Parallelism Limitation on the free tier of Azure DevOps.
+	•	Action Taken: Submitted an official request for additional parallelism capacity.
+	•	Outcome: Build pipeline configuration validated, but execution blocked due to free-tier restrictions.
+
+Web Application Features & Screenshots
+
+Public Pages
+	•	Home Page: Navigation bar with disaster logging, donation options, login/register, and footer.
+	•	About Us Page: Displays mission, philosophy, and history with donation prompt.
+	•	Contact Page: Embedded map and contact form.
+	•	Register/Login Pages: Secure authentication for users and admin access.
+
+User Functionality
+	•	Report disasters (specifying type and location).
+	•	Donate goods or money through dedicated forms.
+	•	Register as a volunteer to participate in relief programs.
+	•	User Dashboard to track personal activity.
+
+Admin Functionality
+	•	Admin Dashboard: Provides overview of volunteer activities and statistics.
+	•	Task Management: Admins can create, assign, and monitor volunteer tasks.
+	•	Volunteer Management: Approve and manage volunteer registrations.
+
+
+Pipelines Evidence
+	•	YAML configuration file created and linked to project.
+	•	Documentation of failed build logs due to Parallelism Limitation.
+
+References
+	•	Microsoft Docs – ASP.NET Core MVC
+	•	Microsoft Docs – ASP.NET Identity
+	•	Entity Framework Core – EF Core Documentation
+	•	Bootstrap 5 – Bootstrap Documentation
+	•	Azure DevOps – Pipelines
 
 ## Table of Contents
 - [Features](#features)
