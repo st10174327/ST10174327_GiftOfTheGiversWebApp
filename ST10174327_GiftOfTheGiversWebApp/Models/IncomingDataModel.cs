@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace ST10174327_GiftOfTheGiversWebApp.Models
 {
@@ -22,5 +22,10 @@ namespace ST10174327_GiftOfTheGiversWebApp.Models
         /// List of money donations.
         /// </summary>
         public IEnumerable<MoneyDonation> MoneyDonations { get; set; } = new List<MoneyDonation>();
+
+        /// <summary>
+        /// Total number of volunteers.
+        /// </summary>
+        public int VolunteerCount { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -22,10 +22,10 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         [Authorize]
         public async Task<IActionResult> Index()
         {
-            if (!User.Identity.IsAuthenticated)
+            if (!User.Identity?.IsAuthenticated == true)
                 return RedirectToAction("Login", "Account");
 
-            string currentUsername = User.Identity.Name;
+            string currentUsername = User.Identity.Name ?? throw new InvalidOperationException("User not authenticated");
             var userMoneyDonations = await _context.MoneyDonation
                 .Where(d => d.USERNAME == currentUsername)
                 .ToListAsync();
@@ -49,8 +49,15 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
 
         // GET: Create
         [Authorize]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            // Get available disasters for allocation
+            var availableDisasters = await _context.Disaster
+                .Where(d => d.IsActive == 1)
+                .ToListAsync();
+
+            ViewBag.AvailableDisasters = availableDisasters;
+
             return View();
         }
 
@@ -58,11 +65,11 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Create([Bind("MONEY_DONATION_ID,DATE,AMOUNT,DONOR")] MoneyDonation moneyDonation)
+        public async Task<IActionResult> Create([Bind("MONEY_DONATION_ID,DATE,AMOUNT,DONOR,DISASTER_ID")] MoneyDonation moneyDonation)
         {
             if (ModelState.IsValid)
             {
-                string currentUsername = User.Identity.Name;
+                string currentUsername = User.Identity?.Name ?? throw new InvalidOperationException("User not authenticated");
                 moneyDonation.USERNAME = currentUsername;
 
                 if (moneyDonation.DATE < DateTime.Now.Date)
@@ -94,8 +101,30 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
                     _context.Update(money);
                 }
 
+                // Create allocation record if disaster is specified
+                if (moneyDonation.DISASTER_ID.HasValue && moneyDonation.DISASTER_ID.Value > 0)
+                {
+                    var allocation = new MoneyAllocation
+                    {
+                        DISASTER_ID = moneyDonation.DISASTER_ID.Value,
+                        AllocationAmount = moneyDonation.AMOUNT,
+                        AllocationDate = moneyDonation.DATE.GetValueOrDefault(),
+                        AidType = "Donation Allocation"
+                    };
+                    _context.MoneyAllocation.Add(allocation);
+
+                    // Update remaining money (only if we have a valid money record)
+                    if (money != null)
+                    {
+                        money.RemainingMoney -= moneyDonation.AMOUNT;
+                        _context.Update(money);
+                    }
+                }
+
                 _context.Add(moneyDonation);
                 await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Money donation submitted successfully! Thank you for your generous contribution.";
 
                 return RedirectToAction(nameof(Index));
             }
@@ -118,7 +147,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id, [Bind("MONEY_DONATION_ID,USERNAME,DATE,AMOUNT,DONOR")] MoneyDonation updatedDonation)
+        public async Task<IActionResult> Edit(int id, [Bind("MONEY_DONATION_ID,USERNAME,DATE,AMOUNT,DONOR,DISASTER_ID")] MoneyDonation updatedDonation)
         {
             if (id != updatedDonation.MONEY_DONATION_ID) return NotFound();
 
@@ -132,15 +161,19 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
                     decimal difference = updatedDonation.AMOUNT - existingDonation.AMOUNT;
 
                     // Update money totals
-                    var money = _context.Money.First();
-                    money.TotalMoney += difference;
-                    money.RemainingMoney += difference;
-                    _context.Update(money);
+                    var money = _context.Money.FirstOrDefault();
+                    if (money != null)
+                    {
+                        money.TotalMoney += difference;
+                        money.RemainingMoney += difference;
+                        _context.Update(money);
+                    }
 
                     // Update donation
-                    existingDonation.DATE = updatedDonation.DATE;
+                    existingDonation.DATE = updatedDonation.DATE.GetValueOrDefault();
                     existingDonation.AMOUNT = updatedDonation.AMOUNT;
                     existingDonation.DONOR = updatedDonation.DONOR;
+                    existingDonation.DISASTER_ID = updatedDonation.DISASTER_ID;
                     _context.Update(existingDonation);
 
                     await _context.SaveChangesAsync();
@@ -181,10 +214,13 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             if (moneyDonation == null) return NotFound();
 
             // Adjust totals
-            var money = _context.Money.First();
-            money.TotalMoney -= moneyDonation.AMOUNT;
-            money.RemainingMoney -= moneyDonation.AMOUNT;
-            _context.Update(money);
+            var money = _context.Money.FirstOrDefault();
+            if (money != null)
+            {
+                money.TotalMoney -= moneyDonation.AMOUNT;
+                money.RemainingMoney -= moneyDonation.AMOUNT;
+                _context.Update(money);
+            }
 
             _context.MoneyDonation.Remove(moneyDonation);
             await _context.SaveChangesAsync();

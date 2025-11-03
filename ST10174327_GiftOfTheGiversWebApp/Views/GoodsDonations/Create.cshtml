@@ -1,4 +1,4 @@
-﻿@model ST10174327_GiftOfTheGiversWebApp.Models.GoodsDonation
+@model ST10174327_GiftOfTheGiversWebApp.Models.GoodsDonation
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
@@ -39,9 +39,13 @@
                         <option value="Non-Perishable Foods">Non-Perishable Foods</option>
                         @if (ViewBag.CategoryList != null)
                         {
-                            foreach (var category in ViewBag.CategoryList as List<string>)
+                            var categoryList = ViewBag.CategoryList as List<string>;
+                            if (categoryList != null)
                             {
-                                <option value="@category">@category</option>
+                                foreach (var category in categoryList)
+                                {
+                                    <option value="@category">@category</option>
+                                }
                             }
                         }
                     </select>

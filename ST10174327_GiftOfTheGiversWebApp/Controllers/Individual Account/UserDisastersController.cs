@@ -9,70 +9,44 @@ using System.Threading.Tasks;
 
 namespace ST10174327_GiftOfTheGiversWebApp.Controllers
 {
-    [Authorize] // All actions require login
+    [Authorize] // all actions require login
     public class UserDisastersController : Controller
     {
         private readonly ApplicationDbContext _context;
-
-        public UserDisastersController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        public UserDisastersController(ApplicationDbContext context) => _context = context;
 
         // GET: UserDisasters
         public async Task<IActionResult> Index()
         {
-            string? currentUsername = User.Identity?.Name;
+            string? username = User.Identity?.Name;
 
             if (User.IsInRole("Admin"))
-            {
-                // Admin sees all disasters
-                return View(await _context.Disaster.ToListAsync());
-            }
+                return View(await _context.Disasters.ToListAsync());
 
-            if (string.IsNullOrEmpty(currentUsername))
-                return RedirectToAction("Login", "Account");
+            if (string.IsNullOrEmpty(username))
+                return Challenge(); // Azure AD login
 
-            // Normal user sees only their disasters
-            var userDisasters = await _context.Disaster
-                .Where(d => d.USERNAME == currentUsername)
+            var disasters = await _context.Disasters
+                .Where(d => d.USERNAME == username)
                 .ToListAsync();
 
-            return View(userDisasters);
-        }
-
-        // GET: UserDisasters/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null) return NotFound();
-
-            var disaster = await _context.Disaster.FirstOrDefaultAsync(m => m.DISASTER_ID == id);
-            if (disaster == null) return NotFound();
-
-            if (!User.IsInRole("Admin") && disaster.USERNAME != User.Identity?.Name)
-                return Forbid(); // prevent other users from snooping
-
-            return View(disaster);
+            return View(disasters);
         }
 
         // GET: UserDisasters/Create
-        public IActionResult Create()
+        public IActionResult Create() => View(new Disaster
         {
-            return View(new Disaster
-            {
-                STARTDATE = DateTime.Now.Date,
-                ENDDATE = DateTime.Now.Date.AddDays(1)
-            });
-        }
+            STARTDATE = DateTime.Now.Date,
+            ENDDATE = DateTime.Now.Date.AddDays(1)
+        });
 
         // POST: UserDisasters/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("STARTDATE,ENDDATE,LOCATION,AID_TYPE")] Disaster disaster)
+        public async Task<IActionResult> Create([Bind("STARTDATE,ENDDATE,LOCATION,AID_TYPE,DisasterName,Description")] Disaster disaster)
         {
-            string? currentUsername = User.Identity?.Name;
-            if (string.IsNullOrEmpty(currentUsername))
-                return RedirectToAction("Login", "Account");
+            string? username = User.Identity?.Name;
+            if (string.IsNullOrEmpty(username)) return Challenge();
 
             if (!ModelState.IsValid) return View(disaster);
 
@@ -88,12 +62,13 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
                 return View(disaster);
             }
 
-            // assign username & active state
-            disaster.USERNAME = currentUsername;
+            disaster.USERNAME = username;
             disaster.IsActive = (disaster.STARTDATE <= DateTime.Now && DateTime.Now <= disaster.ENDDATE) ? 1 : 0;
 
-            _context.Add(disaster);
+            _context.Disasters.Add(disaster);
             await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Disaster report submitted successfully.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -103,7 +78,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         {
             if (id == null) return NotFound();
 
-            var disaster = await _context.Disaster.FindAsync(id);
+            var disaster = await _context.Disasters.FindAsync(id);
             if (disaster == null) return NotFound();
 
             if (!User.IsInRole("Admin") && disaster.USERNAME != User.Identity?.Name)
@@ -116,39 +91,31 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,User")]
-        public async Task<IActionResult> Edit(int id, [Bind("DISASTER_ID,STARTDATE,ENDDATE,LOCATION,AID_TYPE")] Disaster disaster)
+        public async Task<IActionResult> Edit(int id, [Bind("DISASTER_ID,STARTDATE,ENDDATE,LOCATION,AID_TYPE,DisasterName,Description")] Disaster disaster)
         {
-            var existingDisaster = await _context.Disaster.FindAsync(id);
-            if (existingDisaster == null) return NotFound();
+            var existing = await _context.Disasters.FindAsync(id);
+            if (existing == null) return NotFound();
 
-            if (!User.IsInRole("Admin") && existingDisaster.USERNAME != User.Identity?.Name)
+            if (!User.IsInRole("Admin") && existing.USERNAME != User.Identity?.Name)
                 return Forbid();
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    // update only allowed fields
-                    existingDisaster.STARTDATE = disaster.STARTDATE;
-                    existingDisaster.ENDDATE = disaster.ENDDATE;
-                    existingDisaster.LOCATION = disaster.LOCATION;
-                    existingDisaster.AID_TYPE = disaster.AID_TYPE;
+                existing.STARTDATE = disaster.STARTDATE;
+                existing.ENDDATE = disaster.ENDDATE;
+                existing.LOCATION = disaster.LOCATION;
+                existing.AID_TYPE = disaster.AID_TYPE;
+                existing.DisasterName = disaster.DisasterName;
+                existing.Description = disaster.Description;
+                existing.IsActive = (existing.STARTDATE <= DateTime.Now && DateTime.Now <= existing.ENDDATE) ? 1 : 0;
 
-                    // recalc active flag
-                    existingDisaster.IsActive = (existingDisaster.STARTDATE <= DateTime.Now && DateTime.Now <= existingDisaster.ENDDATE) ? 1 : 0;
+                _context.Disasters.Update(existing);
+                await _context.SaveChangesAsync();
 
-                    _context.Update(existingDisaster);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!_context.Disaster.Any(e => e.DISASTER_ID == id))
-                        return NotFound();
-                    else
-                        throw;
-                }
+                TempData["SuccessMessage"] = "Disaster report updated successfully.";
                 return RedirectToAction(nameof(Index));
             }
+
             return View(disaster);
         }
 
@@ -158,7 +125,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         {
             if (id == null) return NotFound();
 
-            var disaster = await _context.Disaster.FirstOrDefaultAsync(m => m.DISASTER_ID == id);
+            var disaster = await _context.Disasters.FindAsync(id);
             if (disaster == null) return NotFound();
 
             if (!User.IsInRole("Admin") && disaster.USERNAME != User.Identity?.Name)
@@ -173,13 +140,13 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var disaster = await _context.Disaster.FindAsync(id);
+            var disaster = await _context.Disasters.FindAsync(id);
             if (disaster == null) return NotFound();
 
             if (!User.IsInRole("Admin") && disaster.USERNAME != User.Identity?.Name)
                 return Forbid();
 
-            _context.Disaster.Remove(disaster);
+            _context.Disasters.Remove(disaster);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ST10174327_GiftOfTheGiversWebApp.Data;
@@ -138,8 +138,8 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         public async Task<IActionResult> TaskDetails(int id)
         {
             var task = await _context.VolunteerTasks
-                .Include(t => t.Assignments!)
-                .ThenInclude(a => a.Volunteer)
+                .Include(t => t.TaskAssignments)
+                .ThenInclude(ta => ta.Volunteer)
                 .FirstOrDefaultAsync(t => t.TaskID == id);
 
             if (task == null)
@@ -193,13 +193,15 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         public async Task<IActionResult> UpdateTaskStatus(int taskId, string status)
         {
             var task = await _context.VolunteerTasks.FindAsync(taskId);
-            if (task != null)
+            if (task == null)
             {
-                task.Status = status;
-                _context.VolunteerTasks.Update(task);
-                await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Task status updated successfully!";
+                return NotFound();
             }
+
+            task.Status = status;
+            _context.VolunteerTasks.Update(task);
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Task status updated successfully!";
             return RedirectToAction(nameof(TaskDetails), new { id = taskId });
         }
 
@@ -217,8 +219,11 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
                 _context.TaskAssignments.Update(assignment);
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Assignment updated successfully!";
+
+                return RedirectToAction(nameof(TaskDetails), new { id = assignment.TaskID });
             }
-            return RedirectToAction(nameof(TaskDetails), new { id = assignment.TaskID });
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }

@@ -1,12 +1,14 @@
-﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.Identity.Web
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
+@inject Microsoft.Identity.Web.ITokenAcquisition TokenAcquisition
 
 <ul class="navbar-nav">
-    @if (SignInManager.IsSignedIn(User))
+    @if (User.Identity?.IsAuthenticated == true)
     {
         <li class="nav-item">
-            <span class="nav-link text-light">Welcome @UserManager.GetUserName(User)</span>
+            <span class="nav-link text-light">Welcome @User.Identity.Name</span>
         </li>
         @if (User.IsInRole("Admin"))
         {
@@ -43,9 +45,16 @@
         }
 
         <li class="nav-item">
-            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                <button type="submit" class="nav-link btn btn-link text-light">Logout</button>
-            </form>
+            @if (User.Claims.Any(c => c.Issuer == "https://login.microsoftonline.com/" || c.Issuer == "https://sts.windows.net/"))
+            {
+                <a class="nav-link text-light" asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignOut">Sign out (Azure AD)</a>
+            }
+            else
+            {
+                <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                    <button type="submit" class="nav-link btn btn-link text-light">Logout</button>
+                </form>
+            }
         </li>
     }
     else
@@ -54,7 +63,10 @@
             <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Register">Register</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Login">Login</a>
+            <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Login">Local Login</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-light" asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignIn">Sign in with Microsoft</a>
         </li>
     }
 </ul>

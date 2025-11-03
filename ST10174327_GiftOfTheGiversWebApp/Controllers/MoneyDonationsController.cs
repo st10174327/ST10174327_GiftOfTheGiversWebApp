@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -21,8 +21,8 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         // GET: MoneyDonations
         public async Task<IActionResult> Index()
         {
-            return _context.MoneyDonation != null
-                ? View(await _context.MoneyDonation.ToListAsync())
+            return _context.MoneyDonations != null
+                ? View(await _context.MoneyDonations.ToListAsync())
                 : Problem("Entity set 'ApplicationDbContext.MoneyDonation' is null.");
         }
 
@@ -74,7 +74,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             }
 
             // Update Money totals
-            var money = await _context.Money.FirstOrDefaultAsync();
+            var money = await _context.Moneys.FirstOrDefaultAsync();
             if (money == null)
             {
                 money = new Money
@@ -88,10 +88,10 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             {
                 money.TotalMoney += moneyDonation.AMOUNT;
                 money.RemainingMoney += moneyDonation.AMOUNT;
-                _context.Update(money);
+                _context.Moneys.Update(money);
             }
 
-            _context.Add(moneyDonation);
+            _context.MoneyDonations.Add(moneyDonation);
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
@@ -101,9 +101,9 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.MoneyDonation == null) return NotFound();
+            if (id == null || _context.MoneyDonations == null) return NotFound();
 
-            var moneyDonation = await _context.MoneyDonation.FindAsync(id);
+            var moneyDonation = await _context.MoneyDonations.FindAsync(id);
             return moneyDonation == null ? NotFound() : View(moneyDonation);
         }
 
@@ -117,17 +117,17 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
 
             if (!ModelState.IsValid) return View(moneyDonation);
 
-            var existingMoneyDonation = await _context.MoneyDonation.FindAsync(id);
+            var existingMoneyDonation = await _context.MoneyDonations.FindAsync(id);
             if (existingMoneyDonation == null) return NotFound();
 
             // Adjust Money totals
             decimal donationDifference = moneyDonation.AMOUNT - existingMoneyDonation.AMOUNT;
-            var money = await _context.Money.FirstOrDefaultAsync();
+            var money = await _context.Moneys.FirstOrDefaultAsync();
             if (money != null)
             {
                 money.TotalMoney += donationDifference;
                 money.RemainingMoney += donationDifference;
-                _context.Update(money);
+                _context.Moneys.Update(money);
             }
 
             // Update editable fields
@@ -137,7 +137,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
                 ? existingMoneyDonation.USERNAME
                 : moneyDonation.DONOR;
 
-            _context.Update(existingMoneyDonation);
+            _context.MoneyDonations.Update(existingMoneyDonation);
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
@@ -147,9 +147,9 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.MoneyDonation == null) return NotFound();
+            if (id == null || _context.MoneyDonations == null) return NotFound();
 
-            var moneyDonation = await _context.MoneyDonation.FindAsync(id);
+            var moneyDonation = await _context.MoneyDonations.FindAsync(id);
             return moneyDonation == null ? NotFound() : View(moneyDonation);
         }
 
@@ -159,27 +159,24 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var moneyDonation = await _context.MoneyDonation.FindAsync(id);
+            var moneyDonation = await _context.MoneyDonations.FindAsync(id);
             if (moneyDonation != null)
             {
-                var money = await _context.Money.FirstOrDefaultAsync();
+                var money = await _context.Moneys.FirstOrDefaultAsync();
                 if (money != null)
                 {
                     money.TotalMoney -= moneyDonation.AMOUNT;
                     money.RemainingMoney -= moneyDonation.AMOUNT;
-                    _context.Update(money);
+                    _context.Moneys.Update(money);
                 }
 
-                _context.Remove(moneyDonation);
+                _context.MoneyDonations.Remove(moneyDonation);
                 await _context.SaveChangesAsync();
             }
 
             return RedirectToAction(nameof(Index));
         }
 
-        private bool MoneyDonationExists(int id)
-        {
-            return _context.MoneyDonation.Any(e => e.MONEY_DONATION_ID == id);
-        }
+        private bool MoneyDonationExists(int id) => _context.MoneyDonations.Any(e => e.MONEY_DONATION_ID == id);
     }
 }

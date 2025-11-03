@@ -1,63 +1,202 @@
-﻿@model ST10174327_GiftOfTheGiversWebApp.Models.Disaster
+@model ST10174327_GiftOfTheGiversWebApp.Models.Disaster
 @{
-    ViewData["Title"] = "Report Disaster";
+    ViewData["Title"] = "Report a Disaster";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
-    <h2 class="mb-3">Report a Disaster</h2>
-    <hr />
-
+<div class="container my-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <form asp-action="Create" class="needs-validation" novalidate>
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                <input asp-for="USERNAME" type="hidden" value="@User.Identity.Name" />
-
-                <div class="mb-3">
-                    <label asp-for="STARTDATE" class="form-label"></label>
-                    <input asp-for="STARTDATE" class="form-control" type="date" />
-                    <span asp-validation-for="STARTDATE" class="text-danger"></span>
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Report a Disaster
+                    </h4>
+                    <small class="text-white-50">Help us identify areas that need immediate assistance</small>
                 </div>
 
-                <div class="mb-3">
-                    <label asp-for="ENDDATE" class="form-label"></label>
-                    <input asp-for="ENDDATE" class="form-control" type="date" />
-                    <span asp-validation-for="ENDDATE" class="text-danger"></span>
-                </div>
+                <div class="card-body p-4">
+                    <!-- Success Message -->
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
 
-                <div class="mb-3">
-                    <label asp-for="LOCATION" class="form-label"></label>
-                    <input asp-for="LOCATION" class="form-control" />
-                    <span asp-validation-for="LOCATION" class="text-danger"></span>
-                </div>
+                    <form asp-action="Create" class="needs-validation" novalidate>
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-                <div class="mb-3">
-                    <label asp-for="AID_TYPE" class="form-label"></label>
-                    <select asp-for="AID_TYPE" class="form-select">
-                        <option value="">-- Select an Aid Type --</option>
-                        <option>Emergency Shelter</option>
-                        <option>Food Assistance</option>
-                        <option>Medical Aid</option>
-                        <option>Clean Water and Sanitation</option>
-                        <option>Search and Rescue</option>
-                        <option>Psychological Support</option>
-                        <option>Logistical Support</option>
-                        <option>Infrastructure Repair</option>
-                        <option>Educational Support</option>
-                        <option>Livelihood Assistance</option>
-                    </select>
-                    <span asp-validation-for="AID_TYPE" class="text-danger"></span>
-                </div>
+                        <input asp-for="USERNAME" type="hidden" value="@(User.Identity?.Name ?? "")" />
 
-                <button type="submit" class="btn btn-primary">Submit</button>
-                <a asp-action="Index" class="btn btn-secondary ms-2">Back to List</a>
-            </form>
+                        <!-- Disaster Name -->
+                        <div class="mb-3">
+                            <label asp-for="DisasterName" class="form-label fw-bold">
+                                <i class="fas fa-tag me-1"></i>Disaster Name/Title
+                            </label>
+                            <input asp-for="DisasterName" class="form-control form-control-lg" placeholder="e.g., Cape Town Floods 2024, Eastern Cape Fire" />
+                            <div class="form-text">Provide a descriptive name or title for this disaster incident</div>
+                            <span asp-validation-for="DisasterName" class="text-danger"></span>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-bold">
+                                <i class="fas fa-align-left me-1"></i>Description
+                            </label>
+                            <textarea asp-for="Description" class="form-control" rows="4"
+                                      placeholder="Describe the disaster situation in detail. Include information about the affected area, number of people impacted, immediate needs, and any other relevant details..."></textarea>
+                            <div class="form-text">Provide detailed information about the disaster to help our response team</div>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <!-- Location -->
+                        <div class="mb-3">
+                            <label asp-for="LOCATION" class="form-label fw-bold">
+                                <i class="fas fa-map-marker-alt me-1"></i>Location
+                            </label>
+                            <input asp-for="LOCATION" class="form-control form-control-lg"
+                                   placeholder="e.g., Cape Town, Western Cape; Johannesburg, Gauteng" />
+                            <div class="form-text">Specify the city, province, or exact location of the disaster</div>
+                            <span asp-validation-for="LOCATION" class="text-danger"></span>
+                        </div>
+
+                        <!-- Start Date -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="STARTDATE" class="form-label fw-bold">
+                                    <i class="fas fa-calendar-plus me-1"></i>Start Date
+                                </label>
+                                <input asp-for="STARTDATE" class="form-control" type="date" />
+                                <span asp-validation-for="STARTDATE" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ENDDATE" class="form-label fw-bold">
+                                    <i class="fas fa-calendar-minus me-1"></i>End Date (Estimated)
+                                </label>
+                                <input asp-for="ENDDATE" class="form-control" type="date" />
+                                <span asp-validation-for="ENDDATE" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Aid Type -->
+                        <div class="mb-4">
+                            <label asp-for="AID_TYPE" class="form-label fw-bold">
+                                <i class="fas fa-hands-helping me-1"></i>Type of Aid Required
+                            </label>
+                            <select asp-for="AID_TYPE" class="form-select form-select-lg">
+                                <option value="">-- Select the primary type of aid needed --</option>
+                                <option value="Emergency Shelter">🏠 Emergency Shelter</option>
+                                <option value="Food Assistance">🍽️ Food Assistance</option>
+                                <option value="Medical Aid">🏥 Medical Aid</option>
+                                <option value="Clean Water and Sanitation">💧 Clean Water and Sanitation</option>
+                                <option value="Search and Rescue">🔍 Search and Rescue</option>
+                                <option value="Psychological Support">🧠 Psychological Support</option>
+                                <option value="Logistical Support">📦 Logistical Support</option>
+                                <option value="Infrastructure Repair">🔧 Infrastructure Repair</option>
+                                <option value="Educational Support">📚 Educational Support</option>
+                                <option value="Livelihood Assistance">💼 Livelihood Assistance</option>
+                            </select>
+                            <span asp-validation-for="AID_TYPE" class="text-danger"></span>
+                        </div>
+
+                        <!-- Emergency Contact Info -->
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Emergency Contact:</strong> If this is an immediate emergency requiring urgent response,
+                            please call our 24/7 emergency hotline: <strong>0800 123 456</strong>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg me-md-2">
+                                <i class="fas fa-arrow-left me-1"></i>Back to My Disasters
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Disaster Report
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body text-center p-3">
+                    <small class="text-muted">
+                        <i class="fas fa-question-circle me-1"></i>
+                        Need help filling out this form? Contact us at
+                        <a href="mailto:disaster.report@giftofthegivers.org" class="text-decoration-none">
+                            disaster.report@giftofthegivers.org
+                        </a>
+                    </small>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
+<style>
+    .form-control:focus, .form-select:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+
+    .btn-primary {
+        background: linear-gradient(45deg, #dc3545, #c82333);
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(45deg, #c82333, #dc3545);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+    }
+
+    .alert-info {
+        border-left: 4px solid #0dcaf0;
+        background-color: #f8f9fa;
+    }
+</style>
+
 @section Scripts {
-    @await Html.PartialAsync("_ValidationScriptsPartial")
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Auto-suggest aid type based on description
+        document.querySelector('textarea[name="Description"]').addEventListener('input', function() {
+            const text = this.value.toLowerCase();
+            const aidTypeSelect = document.querySelector('select[name="AID_TYPE"]');
+
+            if (text.includes('flood') || text.includes('water')) {
+                if (aidTypeSelect.value === '') aidTypeSelect.value = 'Clean Water and Sanitation';
+            } else if (text.includes('fire') || text.includes('burn')) {
+                if (aidTypeSelect.value === '') aidTypeSelect.value = 'Emergency Shelter';
+            } else if (text.includes('medical') || text.includes('health') || text.includes('injury')) {
+                if (aidTypeSelect.value === '') aidTypeSelect.value = 'Medical Aid';
+            } else if (text.includes('food') || text.includes('hunger') || text.includes('starvation')) {
+                if (aidTypeSelect.value === '') aidTypeSelect.value = 'Food Assistance';
+            }
+        });
+
+        // Show success message
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>
+            // Auto-hide success message after 5 seconds
+            setTimeout(function() {
+                const alert = document.querySelector('.alert-success');
+                if (alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, 5000);
+            </text>
+        }
+    </script>
 }

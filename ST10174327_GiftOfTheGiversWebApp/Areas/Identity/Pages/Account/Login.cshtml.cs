@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
@@ -20,11 +20,15 @@ namespace ST10174327_GiftOfTheGiversWebApp.Areas.Identity.Pages.Account
     public class LoginModel : PageModel
     {
         private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<IdentityUser> _userManager;
         private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(SignInManager<IdentityUser> signInManager, ILogger<LoginModel> logger)
+        public LoginModel(SignInManager<IdentityUser> signInManager, 
+                         UserManager<IdentityUser> userManager,
+                         ILogger<LoginModel> logger)
         {
             _signInManager = signInManager;
+            _userManager = userManager;
             _logger = logger;
         }
 
@@ -108,19 +112,35 @@ namespace ST10174327_GiftOfTheGiversWebApp.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
+                // Check if input is an email
+                var user = await _userManager.FindByEmailAsync(Input.UserName) ?? 
+                          await _userManager.FindByNameAsync(Input.UserName);
+                
+                if (user == null)
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    return Page();
+                }
+
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                var result = await _signInManager.PasswordSignInAsync(user.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
-
-                    // Check if the user logging in is an admin
-                    var user = await _signInManager.UserManager.FindByNameAsync(Input.UserName);
-                    if (await _signInManager.UserManager.IsInRoleAsync(user, "Admin"))
+                    
+                    // Check if the user is an admin
+                    var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+                    
+                    // If not an admin, check if they have any role at all
+                    if (!isAdmin)
                     {
-                        // If the user is an admin, add the "Admin" role to them
-                        await _signInManager.UserManager.AddToRoleAsync(user, "Admin");
+                        var roles = await _userManager.GetRolesAsync(user);
+                        if (!roles.Any())
+                        {
+                            // If no roles, add them to User role
+                            await _userManager.AddToRoleAsync(user, "User");
+                        }
                     }
 
                     return LocalRedirect(returnUrl);

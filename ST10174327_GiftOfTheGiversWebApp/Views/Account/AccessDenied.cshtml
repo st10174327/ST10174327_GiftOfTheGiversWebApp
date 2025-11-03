@@ -1,0 +1,48 @@
+@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <div class="text-danger mb-4">
+                        <i class="fas fa-exclamation-triangle fa-5x"></i>
+                    </div>
+                    <h1 class="display-4 text-danger mb-4">Access Denied</h1>
+                    <p class="lead">You do not have permission to access this resource.</p>
+                    <p>If you believe this is an error, please contact the administrator or try signing in with a different account.</p>
+                    <div class="mt-4">
+                        <a href="javascript:history.back()" class="btn btn-outline-secondary me-2">
+                            <i class="fas fa-arrow-left me-1"></i> Go Back
+                        </a>
+                        <a href="/" class="btn btn-primary">
+                            <i class="fas fa-home me-1"></i> Return to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            border: none;
+            border-radius: 0.5rem;
+        }
+        .text-danger i {
+            animation: bounce 2s infinite;
+        }
+        @@keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-20px);}
+            60% {transform: translateY(-10px);}
+        }
+    </style>
+}

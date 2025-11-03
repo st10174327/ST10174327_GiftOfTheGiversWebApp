@@ -1,57 +1,275 @@
-﻿@model ST10174327_GiftOfTheGiversWebApp.Models.MoneyDonation
+@model ST10174327_GiftOfTheGiversWebApp.Models.MoneyDonation
 
 @{
     ViewData["Title"] = "Donate Money";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
-    <h2 class="mb-3">Donate Money</h2>
-    <hr />
-
-    <p class="text-muted mb-4">
-        Your monetary donations help us provide timely assistance to those in need. Please fill in the details below to contribute, either anonymously or with your name attached. All contributions are tracked securely for transparency and accountability.
-    </p>
-
+<div class="container my-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <form asp-action="Create" class="needs-validation" novalidate>
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                <input asp-for="USERNAME" type="hidden" value="@User.Identity.Name" />
-
-                <div class="mb-3">
-                    <label asp-for="DATE" class="form-label">Donation Date</label>
-                    <input asp-for="DATE" class="form-control" type="date" />
-                    <span asp-validation-for="DATE" class="text-danger"></span>
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-info text-white text-center py-3">
+                    <h4 class="mb-0">
+                        <i class="fas fa-dollar-sign me-2"></i>
+                        Donate Money
+                    </h4>
+                    <small class="text-white-50">Your financial support saves lives and rebuilds communities</small>
                 </div>
 
-                <div class="mb-3">
-                    <label asp-for="AMOUNT" class="form-label">Amount (ZAR)</label>
-                    <input asp-for="AMOUNT" class="form-control" type="number" step="0.01" min="1" placeholder="Enter the donation amount" />
-                    <span asp-validation-for="AMOUNT" class="text-danger"></span>
-                </div>
+                <div class="card-body p-4">
+                    <!-- Success Message -->
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
 
-                <div class="mb-3">
-                    <label asp-for="DONOR" class="form-label">Donor Type</label><br />
-                    <input type="radio" asp-for="DONOR" name="DONOR" value="Anonymous" /> Anonymous
-                    <input type="radio" asp-for="DONOR" name="DONOR" value="@User.Identity.Name" checked /> Myself
-                    <span asp-validation-for="DONOR" class="text-danger"></span>
-                </div>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p class="text-muted mb-4">
+                                Your monetary donation will directly support disaster relief efforts, providing immediate assistance
+                                to families and communities in crisis. Every rand donated makes a real difference.
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="bg-light rounded p-3">
+                                <i class="fas fa-heart fa-3x text-info mb-2"></i>
+                                <p class="small text-muted mb-0">Your generosity matters</p>
+                            </div>
+                        </div>
+                    </div>
 
-                <div class="d-flex justify-content-start">
-                    <button type="submit" class="btn btn-primary me-2">Donate</button>
-                    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                    <form asp-action="Create" class="needs-validation" novalidate>
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <input asp-for="USERNAME" type="hidden" value="@(User.Identity?.Name ?? "")" />
+
+                        <!-- Donation Date -->
+                        <div class="mb-3">
+                            <label asp-for="DATE" class="form-label fw-bold">
+                                <i class="fas fa-calendar me-1"></i>Donation Date
+                            </label>
+                            <input asp-for="DATE" class="form-control" type="date" />
+                            <span asp-validation-for="DATE" class="text-danger"></span>
+                        </div>
+
+                        <!-- Amount -->
+                        <div class="mb-3">
+                            <label asp-for="AMOUNT" class="form-label fw-bold">
+                                <i class="fas fa-money-bill-wave me-1"></i>Donation Amount (ZAR)
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">R</span>
+                                <input asp-for="AMOUNT" class="form-control form-control-lg" type="number" step="0.01" min="1"
+                                       placeholder="0.00" oninput="updateImpactPreview()" />
+                                <span class="input-group-text">.00</span>
+                            </div>
+                            <div class="form-text">Minimum donation: R10.00</div>
+                            <span asp-validation-for="AMOUNT" class="text-danger"></span>
+                        </div>
+
+                        <!-- Disaster Allocation -->
+                        @if (ViewBag.AvailableDisasters != null && ((List<ST10174327_GiftOfTheGiversWebApp.Models.Disaster>)ViewBag.AvailableDisasters).Any())
+                        {
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Allocate to Active Disaster (Optional)
+                                </label>
+                                <select asp-for="DISASTER_ID" class="form-select" onchange="updateImpactPreview()">
+                                    <option value="">-- Select a disaster to allocate to (optional) --</option>
+                                    @foreach (var disaster in (List<ST10174327_GiftOfTheGiversWebApp.Models.Disaster>)ViewBag.AvailableDisasters)
+                                    {
+                                        <option value="@disaster.DISASTER_ID">
+                                            @disaster.DisasterName - @disaster.LOCATION (@disaster.AID_TYPE)
+                                        </option>
+                                    }
+                                </select>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Direct allocation ensures your donation goes immediately to the specified relief effort.
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>No active disasters available for specific allocation.</strong> Your donation will support general relief efforts.
+                            </div>
+                        }
+
+                        <!-- Donor Information -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-user me-1"></i>Donor Information
+                            </label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="DONOR" name="DONOR" value="Anonymous" id="anonymous" />
+                                <label class="form-check-label" for="anonymous">
+                                    <i class="fas fa-user-secret me-1"></i>Donate Anonymously
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="DONOR" name="DONOR" value="@User.Identity.Name" id="myself" checked />
+                                <label class="form-check-label" for="myself">
+                                    <i class="fas fa-user me-1"></i>Attribute to Myself (@(User.Identity?.Name ?? "User"))
+                                </label>
+                            </div>
+                            <span asp-validation-for="DONOR" class="text-danger"></span>
+                        </div>
+
+                        <!-- Impact Preview -->
+                        <div class="alert alert-info" id="impact-preview">
+                            <h6><i class="fas fa-heart me-2"></i>Your Impact</h6>
+                            <p class="mb-0">
+                                Your donation will help provide essential support to families and communities in need.
+                                Every contribution helps us respond faster to disasters and save more lives.
+                            </p>
+                        </div>
+
+                        <!-- Tax Information -->
+                        <div class="alert alert-warning">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Tax Benefits:</strong> All donations to the Gift of the Givers Foundation are tax-deductible.
+                            You will receive a receipt for your records.
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg me-md-2">
+                                <i class="fas fa-arrow-left me-1"></i>Back to My Donations
+                            </a>
+                            <button type="submit" class="btn btn-info btn-lg">
+                                <i class="fas fa-dollar-sign me-2"></i>Complete Donation
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body text-center p-3">
+                    <small class="text-muted">
+                        <i class="fas fa-question-circle me-1"></i>
+                        Need help with your donation? Contact us at
+                        <a href="mailto:donations@giftofthegivers.org" class="text-decoration-none">
+                            donations@giftofthegivers.org
+                        </a>
+                    </small>
+                </div>
+            </div>
         </div>
     </div>
-
-    <p class="text-muted mt-4">
-        All donations are securely processed and acknowledged. Choosing to donate anonymously ensures your privacy, while donating with your name helps us recognize your contribution publicly if you wish.
-    </p>
 </div>
 
+<style>
+    .form-control:focus, .form-select:focus {
+        border-color: #0dcaf0;
+        box-shadow: 0 0 0 0.2rem rgba(13, 202, 240, 0.25);
+    }
+
+    .btn-info {
+        background: linear-gradient(45deg, #0dcaf0, #0b8aa8);
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-info:hover {
+        background: linear-gradient(45deg, #0b8aa8, #0dcaf0);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(13, 202, 240, 0.4);
+    }
+
+    .alert-info {
+        border-left: 4px solid #0dcaf0;
+        background-color: #f8f9fa;
+    }
+
+    .form-check-input:checked {
+        background-color: #0dcaf0;
+        border-color: #0dcaf0;
+    }
+
+    .input-group-text {
+        background-color: #e9ecef;
+        border-color: #ced4da;
+    }
+
+    .alert-warning {
+        border-left: 4px solid #ffc107;
+    }
+</style>
+
 @section Scripts {
-    @await Html.PartialAsync("_ValidationScriptsPartial")
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Update impact preview based on amount and disaster selection
+        function updateImpactPreview() {
+            const amount = parseFloat(document.querySelector('input[name="AMOUNT"]').value) || 0;
+            const disasterSelect = document.querySelector('select[name="DISASTER_ID"]');
+            const impactDiv = document.getElementById('impact-preview');
+
+            if (amount >= 10) {
+                let impactText = '';
+
+                if (disasterSelect.value) {
+                    const selectedOption = disasterSelect.options[disasterSelect.selectedIndex];
+                    const disasterName = selectedOption.text.split(' - ')[0];
+                    impactText = `R${amount.toFixed(2)} will be directly allocated to support the ${disasterName} relief efforts.`;
+                } else {
+                    if (amount >= 1000) {
+                        impactText = `R${amount.toFixed(2)} can provide emergency relief for approximately ${Math.floor(amount / 200)} families for a week.`;
+                    } else if (amount >= 500) {
+                        impactText = `R${amount.toFixed(2)} can provide emergency food supplies for ${Math.floor(amount / 100)} families.`;
+                    } else if (amount >= 100) {
+                        impactText = `R${amount.toFixed(2)} can help provide clean water for ${Math.floor(amount / 25)} families for a month.`;
+                    } else {
+                        impactText = `R${amount.toFixed(2)} will contribute to our emergency response fund and help save lives.`;
+                    }
+                }
+
+                impactDiv.innerHTML = `
+                    <h6><i class="fas fa-heart me-2"></i>Your Impact</h6>
+                    <p class="mb-0">${impactText}</p>
+                `;
+            } else {
+                impactDiv.innerHTML = `
+                    <h6><i class="fas fa-heart me-2"></i>Your Impact</h6>
+                    <p class="mb-0">Your donation will help provide essential support to families and communities in need. Every contribution helps us respond faster to disasters and save more lives.</p>
+                `;
+            }
+        }
+
+        // Add event listeners
+        document.querySelector('input[name="AMOUNT"]').addEventListener('input', updateImpactPreview);
+        document.querySelector('select[name="DISASTER_ID"]').addEventListener('change', updateImpactPreview);
+
+        // Auto-hide success message
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>
+            setTimeout(function() {
+                const alert = document.querySelector('.alert-success');
+                if (alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, 5000);
+            </text>
+        }
+
+        // Format currency input
+        document.querySelector('input[name="AMOUNT"]').addEventListener('blur', function() {
+            const value = parseFloat(this.value);
+            if (!isNaN(value) && value > 0) {
+                this.value = value.toFixed(2);
+            }
+        });
+    </script>
 }

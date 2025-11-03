@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -26,7 +26,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         // Helper method to populate ViewBags
         private void PopulateViewBags()
         {
-            ViewBag.DisasterTypes = _context.Disaster
+            ViewBag.DisasterTypes = _context.Disasters
                 .Where(d => d.IsActive == 1)
                 .Select(d => new SelectListItem
                 {
@@ -35,10 +35,10 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
                 })
                 .ToList();
 
-            var money = _context.Money.FirstOrDefault();
+            var money = _context.Moneys.FirstOrDefault();
             ViewBag.RemainingMoney = money?.RemainingMoney ?? 0.0m;
 
-            decimal totalAllocated = _context.MoneyAllocation.Sum(m => (decimal?)m.AllocationAmount) ?? 0.0m;
+            decimal totalAllocated = _context.MoneyAllocations.Sum(m => (decimal?)m.AllocationAmount) ?? 0.0m;
             ViewBag.Total = totalAllocated;
         }
 
@@ -47,12 +47,12 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         {
             PopulateViewBags();
 
-            if (_context.MoneyAllocation == null)
+            if (_context.MoneyAllocations == null)
             {
                 return Problem("Entity set 'ApplicationDbContext.MoneyAllocation' is null.");
             }
 
-            var allocations = await _context.MoneyAllocation
+            var allocations = await _context.MoneyAllocations
                 .Include(m => m.Disaster)
                 .OrderByDescending(m => m.AllocationDate)
                 .ToListAsync();
@@ -72,7 +72,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("AllocationAmount,DISASTER_ID")] MoneyAllocation moneyAllocation)
         {
-            var money = _context.Money.FirstOrDefault();
+            var money = _context.Moneys.FirstOrDefault();
 
             if (money == null)
             {
@@ -92,7 +92,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
                     // Set properties
                     moneyAllocation.AllocationDate = DateTime.UtcNow.Date;
 
-                    var selectedDisaster = await _context.Disaster
+                    var selectedDisaster = await _context.Disasters
                         .FirstOrDefaultAsync(d => d.DISASTER_ID == moneyAllocation.DISASTER_ID);
 
                     if (selectedDisaster != null)
@@ -102,10 +102,10 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
                         // Deduct from remaining money
                         money.RemainingMoney -= moneyAllocation.AllocationAmount;
                         money.LastUpdated = DateTime.UtcNow;
-                        _context.Update(money);
+                        _context.Moneys.Update(money);
 
                         // Save allocation
-                        _context.MoneyAllocation.Add(moneyAllocation);
+                        _context.MoneyAllocations.Add(moneyAllocation);
                         await _context.SaveChangesAsync();
 
                         TempData["SuccessMessage"] = "Money allocated successfully!";
@@ -141,7 +141,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
                 return NotFound();
             }
 
-            var moneyAllocation = await _context.MoneyAllocation
+            var moneyAllocation = await _context.MoneyAllocations
                 .Include(m => m.Disaster)
                 .FirstOrDefaultAsync(m => m.MoneyAllocationId == id);
 

@@ -230,8 +230,8 @@ footer {
     line-height: 1.2;
     margin-bottom: 1.5rem;
     background: linear-gradient(135deg, var(--dark-green), var(--primary-green));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
 }
 
 .hero-text p {
@@ -392,8 +392,9 @@ footer {
     }
 }
 
-@media (max-width: 480px) {
-    .hero-text h1 {
-        font-size: 2rem;
-    }
+/* Fix for Bootstrap vendor prefix issues - simplified approach */
+.dropdown-menu {
+    width: auto;
+    min-width: 180px;
+    white-space: nowrap;
 }

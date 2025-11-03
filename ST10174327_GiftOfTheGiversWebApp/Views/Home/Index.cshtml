@@ -1,65 +1,329 @@
-﻿@{
+@{
     ViewData["Title"] = "Home Page";
+    ViewData["ShowHero"] = "true";
 }
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
-@model ST10174327_GiftOfTheGiversWebApp.Models.IncomingDataModel;
+@inject IUrlHelper Url
+@model ST10174327_GiftOfTheGiversWebApp.Models.IncomingDataModel
 
 @if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin"))
 {
-    <div class="container my-5 text-center">
-        <h1 class="display-1 fw-bold text-dark">LATEST STATISTICS</h1>
-        <hr class="border-3 border-dark w-25 mx-auto mb-5" />
-    </div>
-
-    <div class="container">
-        <!-- Goods, Money, Disasters sections here... -->
-    </div>
-}
-else
-{
-    <!-- Public view for regular users or guests -->
     <div class="container my-5">
-        <!-- Blog-style Images -->
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h1 class="display-4 fw-bold text-dark">ADMIN DASHBOARD</h1>
+                <p class="lead text-muted">Manage disaster relief operations and view system statistics</p>
+                <hr class="border-3 border-primary w-25 mx-auto" />
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
         <div class="row g-4 mb-5">
-            <div class="col-12 col-md-12">
-                <div class="card h-100 shadow-sm border-0">
-                    <img src="~/images/Philosophy.png" class="card-img-top rounded" alt="Philosophy" />
+            <div class="col-md-3">
+                <div class="card text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                        <h3 class="stats-counter">@Model?.Disasters?.Count() ?? 0</h3>
+                        <p class="card-text text-muted">Active Disasters</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <i class="fas fa-box fa-3x text-success mb-3"></i>
+                        <h3 class="stats-counter">@Model?.GoodsDonations?.Count() ?? 0</h3>
+                        <p class="card-text text-muted">Goods Donations</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <i class="fas fa-dollar-sign fa-3x text-info mb-3"></i>
+                        <h3 class="stats-counter">@Model?.MoneyDonations?.Count() ?? 0</h3>
+                        <p class="card-text text-muted">Money Donations</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                        <h3 class="stats-counter">@Model?.VolunteerCount ?? 0</h3>
+                        <p class="card-text text-muted">Active Volunteers</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="row g-4 text-center mb-5">
-            <div class="col-12 col-md-4">
-                <a class="btn btn-lg btn-warning w-100 shadow-sm" style="font-size:1.6rem; border-radius:12px;"
-                   asp-controller="UserDisasters" asp-action="Create">
-                    Log a Disaster
-                </a>
+        <!-- Quick Actions -->
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-tasks me-2"></i>Quick Actions</h5>
+                        <div class="d-grid gap-2">
+                            <a href="@Url.Action("Create", "Disasters")" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Add New Disaster
+                            </a>
+                            <a href="@Url.Action("Index", "Disasters")" class="btn btn-outline-primary">
+                                <i class="fas fa-list me-2"></i>View All Disasters
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="col-12 col-md-4">
-                <a class="btn btn-lg btn-warning w-100 shadow-sm" style="font-size:1.6rem; border-radius:12px;"
-                   asp-controller="UserGoodsDonations" asp-action="Create">
-                    Donate Goods
-                </a>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-chart-bar me-2"></i>Recent Activity</h5>
+                        <p class="text-muted">View recent donations and disaster updates</p>
+                        <a href="@Url.Action("Index", "GoodsDonations")" class="btn btn-outline-success">
+                            <i class="fas fa-box me-2"></i>View Donations
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="col-12 col-md-4">
-                <a class="btn btn-lg btn-warning w-100 shadow-sm" style="font-size:1.6rem; border-radius:12px;"
-                   asp-controller="UserMoneyDonations" asp-action="Create">
-                    Donate Money
-                </a>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Hero Section -->
+    <div class="container-fluid py-5 bg-light">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold text-dark mb-4">
+                        Together We Can<br>
+                        <span class="text-primary">Make a Difference</span>
+                    </h1>
+                    <p class="lead text-muted mb-4">
+                        Join the Gift of the Givers Foundation in providing swift and effective aid to communities
+                        affected by natural disasters and emergencies across South Africa and beyond.
+                    </p>
+
+                    @if (!SignInManager.IsSignedIn(User))
+                    {
+                        <div class="mb-4">
+                            <a href="/Identity/Account/Register" class="btn btn-primary btn-lg me-3">
+                                <i class="fas fa-user-plus me-2"></i>Get Started Today
+                            </a>
+                            <a href="@Url.Action("About", "Home")" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-info-circle me-2"></i>Learn More
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="mb-4">
+                            <a href="@Url.Action("Create", "UserDisasters")" class="btn btn-warning btn-lg me-3">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Report a Disaster
+                            </a>
+                            <a href="@Url.Action("Create", "UserGoodsDonations")" class="btn btn-success btn-lg">
+                                <i class="fas fa-gift me-2"></i>Make a Donation
+                            </a>
+                        </div>
+                    }
+                </div>
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-body p-4">
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <i class="fas fa-hands-helping fa-3x text-primary mb-2"></i>
+                                    <h5>Disaster Relief</h5>
+                                    <small class="text-muted">Emergency Response</small>
+                                </div>
+                                <div class="col-4">
+                                    <i class="fas fa-users fa-3x text-success mb-2"></i>
+                                    <h5>Volunteer</h5>
+                                    <small class="text-muted">Community Support</small>
+                                </div>
+                                <div class="col-4">
+                                    <i class="fas fa-heart fa-3x text-danger mb-2"></i>
+                                    <h5>Humanitarian</h5>
+                                    <small class="text-muted">Aid Programs</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold">How You Can Help</h2>
+                <p class="lead text-muted">There are many ways to contribute to our disaster relief efforts</p>
+                <hr class="border-3 border-primary w-25 mx-auto" />
             </div>
         </div>
 
-        <!-- Extra Section: Mission / Impact -->
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h5 class="card-title">Report Disasters</h5>
+                        <p class="card-text text-muted">
+                            Help us identify areas that need immediate assistance by reporting natural disasters and emergencies in your community.
+                        </p>
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <a href="@Url.Action("Create", "UserDisasters")" class="btn btn-outline-primary">
+                                Report Now <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Register", "Account", new { area = "Identity" })" class="btn btn-outline-primary">
+                                Get Started <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <i class="fas fa-box"></i>
+                        <h5 class="card-title">Donate Goods</h5>
+                        <p class="card-text text-muted">
+                            Contribute essential supplies like food, clothing, and medical supplies to help those affected by disasters.
+                        </p>
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <a href="@Url.Action("Create", "UserGoodsDonations")" class="btn btn-outline-success">
+                                Donate Goods <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Register", "Account", new { area = "Identity" })" class="btn btn-outline-success">
+                                Get Started <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <i class="fas fa-dollar-sign"></i>
+                        <h5 class="card-title">Donate Money</h5>
+                        <p class="card-text text-muted">
+                            Your financial contributions help us provide immediate relief and support long-term recovery efforts.
+                        </p>
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <a href="@Url.Action("Create", "UserMoneyDonations")" class="btn btn-outline-info">
+                                Donate Money <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Register", "Account", new { area = "Identity" })" class="btn btn-outline-info">
+                                Get Started <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <i class="fas fa-users"></i>
+                        <h5 class="card-title">Volunteer</h5>
+                        <p class="card-text text-muted">
+                            Join our team of dedicated volunteers and make a direct impact in disaster-stricken communities.
+                        </p>
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <a href="@Url.Action("Index", "AdminVolunteer")" class="btn btn-outline-warning">
+                                Volunteer <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Register", "Account", new { area = "Identity" })" class="btn btn-outline-warning">
+                                Get Started <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Impact Section -->
+    <div class="container-fluid py-5 bg-primary text-white">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-12 mb-4">
+                    <h2 class="display-5 fw-bold">Our Impact</h2>
+                    <p class="lead opacity-75">Making a real difference in communities across South Africa</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="text-center">
+                        <i class="fas fa-home fa-3x mb-3 text-warning"></i>
+                        <h4 class="stats-counter">@Model?.Disasters?.Count() ?? 0</h4>
+                        <p>Disasters Responded To</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="text-center">
+                        <i class="fas fa-users fa-3x mb-3 text-warning"></i>
+                        <h4 class="stats-counter">@Model?.VolunteerCount ?? 0</h4>
+                        <p>Active Volunteers</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="text-center">
+                        <i class="fas fa-box-open fa-3x mb-3 text-warning"></i>
+                        <h4 class="stats-counter">@Model?.GoodsDonations?.Count() ?? 0</h4>
+                        <p>Goods Donations</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="text-center">
+                        <i class="fas fa-map-marked-alt fa-3x mb-3 text-warning"></i>
+                        <h4 class="stats-counter">@Model?.MoneyDonations?.Count() ?? 0</h4>
+                        <p>Money Donations</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mission Statement -->
+    <div class="container py-5">
         <div class="row">
             <div class="col-12 text-center">
-                <h3 class="fw-bold mb-3">Our Mission</h3>
+                <h3 class="display-6 fw-bold mb-4">Our Mission</h3>
                 <p class="lead text-muted mx-auto" style="max-width: 800px;">
-                    Every donation, big or small, makes a real difference. From disaster relief to rebuilding lives,
-                    we are driven by the belief that humanity is strongest when united. Together, we create hope where it is needed most.
+                    The Gift of the Givers Foundation stands as a beacon of hope in times of crisis, dedicated to
+                    providing swift and effective aid to communities struck by natural disasters and emergencies.
+                    We operate on the principles of compassion, efficiency, and resilience, ensuring that every
+                    donation and volunteer effort makes a tangible difference in the lives of those affected by adversity.
                 </p>
+                <div class="mt-4">
+                    <a href="@Url.Action("About", "Home")" class="btn btn-primary btn-lg">
+                        <i class="fas fa-heart me-2"></i>Learn About Our Work
+                    </a>
+                </div>
             </div>
         </div>
     </div>

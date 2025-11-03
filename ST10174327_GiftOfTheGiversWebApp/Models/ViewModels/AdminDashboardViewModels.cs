@@ -12,6 +12,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Models.ViewModels
         public int ActiveDisasters { get; set; }
         public decimal TotalMoneyDonations { get; set; }
         public int TotalGoodsDonations { get; set; }
+        public decimal TotalDonationsValue { get; set; }
         public List<Volunteer> RecentRegistrations { get; set; } = new();
         public List<Disaster> RecentDisasters { get; set; } = new();
     }

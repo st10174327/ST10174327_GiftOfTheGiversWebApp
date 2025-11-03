@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -22,13 +22,13 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         // GET: Disasters
         public async Task<IActionResult> Index()
         {
-            if (_context.Disaster == null)
-                return Problem("Entity set 'ApplicationDbContext.Disaster' is null.");
+            if (_context.Disasters == null)
+                return Problem("Entity set 'ApplicationDbContext.Disasters' is null.");
 
             // Admin sees all, users see only their reports
-            var disasters = User.IsInRole("Admin")
-                ? await _context.Disaster.ToListAsync()
-                : await _context.Disaster.Where(d => d.USERNAME == User.Identity!.Name).ToListAsync();
+var disasters = User.IsInRole("Admin")
+                ? await _context.Disasters.ToListAsync()
+                : await _context.Disasters.Where(d => d.USERNAME == User.Identity!.Name).ToListAsync();
 
             return View(disasters);
         }
@@ -36,10 +36,10 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         // GET: Disasters/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Disaster == null)
+            if (id == null || _context.Disasters == null)
                 return NotFound();
 
-            var disaster = await _context.Disaster
+var disaster = await _context.Disasters
                 .FirstOrDefaultAsync(d => d.DISASTER_ID == id);
 
             if (disaster == null)
@@ -89,7 +89,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             // Calculate active status
             disaster.IsActive = (disaster.STARTDATE <= DateTime.Now.Date && DateTime.Now.Date <= disaster.ENDDATE) ? 1 : 0;
 
-            _context.Add(disaster);
+            _context.Disasters.Add(disaster);
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = "Disaster report submitted successfully!";
             return RedirectToAction(nameof(Index));
@@ -99,10 +99,10 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Disaster == null)
+            if (id == null || _context.Disasters == null)
                 return NotFound();
 
-            var disaster = await _context.Disaster.FindAsync(id);
+            var disaster = await _context.Disasters.FindAsync(id);
             if (disaster == null)
                 return NotFound();
 
@@ -138,7 +138,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
                 // Update active status
                 disaster.IsActive = (disaster.STARTDATE <= DateTime.Now.Date && DateTime.Now.Date <= disaster.ENDDATE) ? 1 : 0;
 
-                _context.Update(disaster);
+                _context.Disasters.Update(disaster);
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Disaster report updated successfully!";
             }
@@ -157,10 +157,10 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Disaster == null)
+            if (id == null || _context.Disasters == null)
                 return NotFound();
 
-            var disaster = await _context.Disaster.FindAsync(id);
+            var disaster = await _context.Disasters.FindAsync(id);
             if (disaster == null)
                 return NotFound();
 
@@ -173,23 +173,19 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Disaster == null)
-                return Problem("Entity set 'ApplicationDbContext.Disaster' is null.");
+            if (_context.Disasters == null)
+                return Problem("Entity set 'ApplicationDbContext.Disasters' is null.");
 
-            var disaster = await _context.Disaster.FindAsync(id);
+            var disaster = await _context.Disasters.FindAsync(id);
             if (disaster == null)
                 return NotFound();
 
-            _context.Disaster.Remove(disaster);
+            _context.Disasters.Remove(disaster);
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = "Disaster report deleted successfully!";
             return RedirectToAction(nameof(Index));
         }
 
-        private bool DisasterExists(int id)
-        {
-            // Fixed: Added null check for _context.Disaster
-            return _context.Disaster?.Any(e => e.DISASTER_ID == id) ?? false;
-        }
+        private bool DisasterExists(int id) => _context.Disasters.Any(e => e.DISASTER_ID == id);
     }
 }

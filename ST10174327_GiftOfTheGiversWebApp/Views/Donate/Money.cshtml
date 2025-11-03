@@ -1,0 +1,102 @@
+@{
+    ViewData["Title"] = "Donate Money";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Donate Money</h3>
+                </div>
+                <div class="card-body">
+                    <p>Your financial contribution will help us provide essential aid to those in need. Please fill out the form below to make a donation.</p>
+                    
+                    <form method="post" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Donation Amount (ZAR)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">R</span>
+                                <input type="number" class="form-control" id="amount" min="1" step="0.01" required>
+                                <div class="invalid-feedback">
+                                    Please enter a valid amount.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="donationType" class="form-label">Donation Type</label>
+                            <select class="form-select" id="donationType" required>
+                                <option value="" selected disabled>Select donation type</option>
+                                <option value="once">One-time Donation</option>
+                                <option value="monthly">Monthly Donation</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a donation type.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Payment Method</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="creditCard" value="creditCard" required>
+                                <label class="form-check-label" for="creditCard">
+                                    <i class="fas fa-credit-card me-2"></i>Credit/Debit Card
+                                </label>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="bankTransfer" value="bankTransfer">
+                                <label class="form-check-label" for="bankTransfer">
+                                    <i class="fas fa-university me-2"></i>Bank Transfer
+                                </label>
+                            </div>
+                            <div class="invalid-feedback">
+                                Please select a payment method.
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-donate me-2"></i>Donate Now
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="mt-4">
+                        <h5>Bank Transfer Details</h5>
+                        <p>You can also make a direct bank transfer to our account:</p>
+                        <div class="bg-light p-3 rounded">
+                            <p class="mb-1"><strong>Bank:</strong> Standard Bank</p>
+                            <p class="mb-1"><strong>Account Name:</strong> Gift of the Givers Foundation</p>
+                            <p class="mb-1"><strong>Account Number:</strong> 1234 5678 90</p>
+                            <p class="mb-0"><strong>Branch Code:</strong> 051001</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Form validation
+        (function () {
+            'use strict'
+            
+            var forms = document.querySelectorAll('.needs-validation')
+            
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+    </script>
+}

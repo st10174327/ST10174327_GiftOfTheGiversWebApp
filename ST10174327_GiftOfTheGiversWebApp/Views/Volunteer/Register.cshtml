@@ -1,0 +1,140 @@
+@{
+    ViewData["Title"] = "Volunteer Registration";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0"><i class="fas fa-hands-helping me-2"></i>Volunteer Registration</h3>
+                </div>
+                <div class="card-body">
+                    <p>Thank you for your interest in volunteering with us. Please fill out the form below to register as a volunteer.</p>
+                    
+                    <form method="post" class="needs-validation" novalidate>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="firstName" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="firstName" required>
+                                <div class="invalid-feedback">
+                                    Please provide your first name.
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="lastName" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="lastName" required>
+                                <div class="invalid-feedback">
+                                    Please provide your last name.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" required>
+                            <div class="invalid-feedback">
+                                Please provide a valid email address.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone" required>
+                            <div class="invalid-feedback">
+                                Please provide a valid phone number.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="skills" class="form-label">Skills and Experience</label>
+                            <textarea class="form-control" id="skills" rows="3" placeholder="Please list any skills or experience that might be relevant"></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="availability" class="form-label">Availability</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="weekdays" value="weekdays">
+                                <label class="form-check-label" for="weekdays">Weekdays</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="weekends" value="weekends">
+                                <label class="form-check-label" for="weekends">Weekends</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="emergency" value="emergency">
+                                <label class="form-check-label" for="emergency">Emergency Response</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and Conditions</a>
+                            </label>
+                            <div class="invalid-feedback">
+                                You must agree to the terms and conditions.
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning text-dark">
+                                <i class="fas fa-user-plus me-2"></i>Register as Volunteer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Terms and Conditions Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Volunteer Agreement</h6>
+                <p>By volunteering with Gift of the Givers Foundation, you agree to the following terms and conditions:</p>
+                <ol>
+                    <li>I understand that I am volunteering my services without any expectation of compensation.</li>
+                    <li>I will follow all safety guidelines and instructions provided by the organization.</li>
+                    <li>I understand that I may be required to undergo a background check.</li>
+                    <li>I agree to maintain the confidentiality of any sensitive information I may encounter.</li>
+                    <li>I understand that the organization reserves the right to terminate my volunteer status at any time.</li>
+                </ol>
+                <p>By checking the box, you acknowledge that you have read and agree to these terms and conditions.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Form validation
+        (function () {
+            'use strict'
+            
+            var forms = document.querySelectorAll('.needs-validation')
+            
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+    </script>
+}

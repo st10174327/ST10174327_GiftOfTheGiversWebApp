@@ -23,15 +23,15 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         // GET: GoodsAllocations
         public async Task<IActionResult> Index()
         {
-            if (_context.GoodsAllocation == null)
-                return Problem("Entity set 'ApplicationDbContext.GoodsAllocation' is null.");
+            if (_context.GoodsAllocations == null)
+                return Problem("Entity set 'ApplicationDbContext.GoodsAllocations' is null.");
 
-            var allocations = await _context.GoodsAllocation
+            var goodsAllocations = await _context.GoodsAllocations
                 .Include(g => g.Disaster)
                 .Include(g => g.GoodsInventory)
                 .ToListAsync();
 
-            return View(allocations);
+            return View(goodsAllocations);
         }
 
         // GET: GoodsAllocations/Create
@@ -54,7 +54,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             }
 
             // Validate disaster
-            var disaster = await _context.Disaster.FirstOrDefaultAsync(d => d.AID_TYPE == aidType && d.IsActive == 1);
+            var disaster = await _context.Disasters.FirstOrDefaultAsync(d => d.AID_TYPE == aidType && d.IsActive == 1);
             if (disaster == null)
             {
                 ModelState.AddModelError("AidType", "Selected disaster is not active or does not exist.");
@@ -63,7 +63,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             }
 
             // Validate inventory
-            var selectedGood = await _context.GoodsInventory.FirstOrDefaultAsync(g => g.CATEGORY == category);
+            var selectedGood = await _context.GoodsInventories.FirstOrDefaultAsync(g => g.CATEGORY == category);
             if (selectedGood == null)
             {
                 ModelState.AddModelError("CATEGORY", "Selected category not found in inventory.");
@@ -88,7 +88,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             goodsAllocation.DISASTER_ID = disaster.DISASTER_ID;
             goodsAllocation.GOODSINVENTORY_ID = selectedGood.GOODS_INVENTORY_ID;
 
-            _context.GoodsAllocation.Add(goodsAllocation);
+            _context.GoodsAllocations.Add(goodsAllocation);
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Goods allocated successfully!";
@@ -102,7 +102,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             if (string.IsNullOrEmpty(category))
                 return Json(0);
 
-            var sumOfItemCount = await _context.GoodsInventory
+            var sumOfItemCount = await _context.GoodsInventories
                 .Where(g => g.CATEGORY == category)
                 .SumAsync(g => g.ITEM_COUNT);
 
@@ -112,20 +112,8 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         // Helper: Populate dropdown lists for Create view
         private async Task PopulateDropdowns()
         {
-            ViewBag.Categories = await _context.GoodsInventory
-                .Select(g => g.CATEGORY)
-                .Distinct()
-                .ToListAsync();
-
-            ViewBag.DisasterTypes = await _context.Disaster
-                .Where(d => d.IsActive == 1)
-                .Select(d => new SelectListItem
-                {
-                    Value = d.AID_TYPE,
-                    Text = d.AID_TYPE
-                })
-                .Distinct()
-                .ToListAsync();
+            ViewData["GOODSINVENTORY_ID"] = new SelectList(await _context.GoodsInventories.ToListAsync(), "GOODS_INVENTORY_ID", "CATEGORY");
+            ViewData["DISASTER_ID"] = new SelectList(await _context.Disasters.ToListAsync(), "DISASTER_ID", "DisasterName");
         }
     }
 }

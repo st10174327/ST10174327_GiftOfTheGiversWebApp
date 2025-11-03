@@ -25,11 +25,12 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
                 TotalVolunteers = await _context.Volunteers.CountAsync(),
                 ActiveTasks = await _context.VolunteerTasks.CountAsync(t => t.Status == "Open" || t.Status == "In Progress"),
                 CompletedTasks = await _context.VolunteerTasks.CountAsync(t => t.Status == "Completed"),
-                TotalDisasters = await _context.Disaster.CountAsync(),
-                ActiveDisasters = await _context.Disaster.CountAsync(d => d.IsActive == 1),
-                TotalMoneyDonations = await _context.MoneyDonation.SumAsync(m => m.AMOUNT),
-                TotalGoodsDonations = await _context.GoodsDonation.SumAsync(g => g.ITEM_COUNT),
-                RecentDisasters = await _context.Disaster
+                TotalDisasters = await _context.Disasters.CountAsync(),
+                ActiveDisasters = await _context.Disasters.CountAsync(d => d.IsActive == 1),
+                TotalMoneyDonations = await _context.MoneyDonations.SumAsync(m => m.AMOUNT ?? 0),
+                TotalGoodsDonations = await _context.GoodsDonations.SumAsync(g => g.ITEM_COUNT ?? 0),
+                TotalDonationsValue = (await _context.MoneyDonations.SumAsync(m => m.AMOUNT) ?? 0) + (await _context.GoodsDonations.SumAsync(g => g.ITEM_COUNT) ?? 0),
+                RecentDisasters = await _context.Disasters
                     .OrderByDescending(d => d.STARTDATE)
                     .Take(5)
                     .ToListAsync(),
@@ -41,7 +42,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             return View(dashboard);
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             return RedirectToAction("Dashboard");
         }
@@ -49,7 +50,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Disasters()
         {
-            var disasters = await _context.Disaster
+            var disasters = await _context.Disasters
                 .Include(d => d.MoneyAllocations)
                 .Include(d => d.GoodsAllocations)
                 .ToListAsync();
@@ -61,10 +62,10 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         {
             var viewModel = new DonationsViewModel
             {
-                MoneyDonations = await _context.MoneyDonation
+                MoneyDonations = await _context.MoneyDonations
                     .Include(m => m.Disaster)
                     .ToListAsync(),
-                GoodsDonations = await _context.GoodsDonation
+                GoodsDonations = await _context.GoodsDonations
                     .Include(g => g.Disaster)
                     .ToListAsync()
             };
@@ -76,10 +77,10 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         {
             var viewModel = new AllocationsViewModel
             {
-                MoneyAllocations = await _context.MoneyAllocation
+                MoneyAllocations = await _context.MoneyAllocations
                     .Include(m => m.Disaster)
                     .ToListAsync(),
-                GoodsAllocations = await _context.GoodsAllocation
+                GoodsAllocations = await _context.GoodsAllocations
                     .Include(g => g.Disaster)
                     .Include(g => g.GoodsInventory)
                     .ToListAsync()
@@ -90,7 +91,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Inventory()
         {
-            var inventory = await _context.GoodsInventory.ToListAsync();
+            var inventory = await _context.GoodsInventories.ToListAsync();
             return View(inventory);
         }
     }

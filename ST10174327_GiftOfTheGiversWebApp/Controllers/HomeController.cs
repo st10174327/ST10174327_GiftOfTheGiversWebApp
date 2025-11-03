@@ -42,7 +42,8 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
                 {
                     GoodsDonations = _context.GoodsDonation.ToList(),
                     MoneyDonations = _context.MoneyDonation.ToList(),
-                    Disasters = _context.Disaster.ToList()
+                    Disasters = _context.Disaster.ToList(),
+                    VolunteerCount = _context.Volunteers.Count()
                 };
 
                 return View(viewModel);

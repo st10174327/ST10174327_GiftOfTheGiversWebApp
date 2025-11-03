@@ -222,18 +222,27 @@ namespace ST10174327_GiftOfTheGiversWebApp.Migrations
 
             modelBuilder.Entity("ST10174327_GiftOfTheGiversWebApp.Models.Disaster", b =>
                 {
-                    b.Property<int>("DISTATER_ID")
+                    b.Property<int>("DISASTER_ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DISTATER_ID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DISASTER_ID"));
 
                     b.Property<string>("AID_TYPE")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime?>("ENDDATE")
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("DisasterName")
                         .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("ENDDATE")
                         .HasColumnType("date");
 
                     b.Property<int>("IsActive")
@@ -241,17 +250,17 @@ namespace ST10174327_GiftOfTheGiversWebApp.Migrations
 
                     b.Property<string>("LOCATION")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime?>("STARTDATE")
-                        .IsRequired()
+                    b.Property<DateTime>("STARTDATE")
                         .HasColumnType("date");
 
                     b.Property<string>("USERNAME")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.HasKey("DISTATER_ID");
+                    b.HasKey("DISASTER_ID");
 
                     b.ToTable("Disaster", (string)null);
                 });
@@ -268,15 +277,25 @@ namespace ST10174327_GiftOfTheGiversWebApp.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("AllocationDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("date");
 
                     b.Property<string>("CATEGORY")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DISASTER_ID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("GOODSINVENTORY_ID")
+                        .HasColumnType("int");
 
                     b.Property<int>("ITEM_COUNT")
                         .HasColumnType("int");
 
                     b.HasKey("GoodsAllocationId");
+
+                    b.HasIndex("DISASTER_ID");
+
+                    b.HasIndex("GOODSINVENTORY_ID");
 
                     b.ToTable("GoodsAllocation");
                 });
@@ -291,27 +310,35 @@ namespace ST10174327_GiftOfTheGiversWebApp.Migrations
 
                     b.Property<string>("CATEGORY")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime?>("DATE")
-                        .IsRequired()
+                    b.Property<DateTime>("DATE")
                         .HasColumnType("date");
 
                     b.Property<string>("DESCRIPTION")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("DISASTER_ID")
+                        .HasColumnType("int");
 
                     b.Property<string>("DONOR")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("ITEM_COUNT")
                         .HasColumnType("int");
 
                     b.Property<string>("USERNAME")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("GOODS_DONATION_ID");
+
+                    b.HasIndex("DISASTER_ID");
 
                     b.ToTable("GoodsDonation");
                 });
@@ -326,9 +353,10 @@ namespace ST10174327_GiftOfTheGiversWebApp.Migrations
 
                     b.Property<string>("CATEGORY")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<int?>("ITEM_COUNT")
+                    b.Property<int>("ITEM_COUNT")
                         .HasColumnType("int");
 
                     b.HasKey("GOODS_INVENTORY_ID");
@@ -345,20 +373,36 @@ namespace ST10174327_GiftOfTheGiversWebApp.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GoodsPurchaseID"));
 
                     b.Property<string>("CATEGORY")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("GOODSINVENTORY_ID")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("GoodsPurchasePrice")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("GoodsTotalPrice")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("ITEM_COUNT")
                         .HasColumnType("int");
 
+                    b.Property<string>("ItemName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("PurchaseDate")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("GoodsPurchaseID");
+
+                    b.HasIndex("GOODSINVENTORY_ID");
 
                     b.ToTable("GoodsPurchase");
                 });
@@ -370,6 +414,9 @@ namespace ST10174327_GiftOfTheGiversWebApp.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MoneyId"));
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
 
                     b.Property<decimal>("RemainingMoney")
                         .HasPrecision(18, 2)
@@ -393,7 +440,8 @@ namespace ST10174327_GiftOfTheGiversWebApp.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MoneyAllocationId"));
 
                     b.Property<string>("AidType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<decimal>("AllocationAmount")
                         .HasPrecision(18, 2)
@@ -402,7 +450,12 @@ namespace ST10174327_GiftOfTheGiversWebApp.Migrations
                     b.Property<DateTime>("AllocationDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("DISASTER_ID")
+                        .HasColumnType("int");
+
                     b.HasKey("MoneyAllocationId");
+
+                    b.HasIndex("DISASTER_ID");
 
                     b.ToTable("MoneyAllocation");
                 });
@@ -423,6 +476,9 @@ namespace ST10174327_GiftOfTheGiversWebApp.Migrations
                         .IsRequired()
                         .HasColumnType("date");
 
+                    b.Property<int?>("DISASTER_ID")
+                        .HasColumnType("int");
+
                     b.Property<string>("DONOR")
                         .HasColumnType("nvarchar(max)");
 
@@ -431,6 +487,8 @@ namespace ST10174327_GiftOfTheGiversWebApp.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("MONEY_DONATION_ID");
+
+                    b.HasIndex("DISASTER_ID");
 
                     b.ToTable("MoneyDonation");
                 });
@@ -451,7 +509,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal?>("HoursWorked")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(5,2)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -493,6 +551,9 @@ namespace ST10174327_GiftOfTheGiversWebApp.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<DateTime?>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -501,14 +562,29 @@ namespace ST10174327_GiftOfTheGiversWebApp.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<string>("IdNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PreferredAreas")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<DateTime>("RegistrationDate")
                         .HasColumnType("datetime2");
@@ -631,6 +707,66 @@ namespace ST10174327_GiftOfTheGiversWebApp.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ST10174327_GiftOfTheGiversWebApp.Models.GoodsAllocation", b =>
+                {
+                    b.HasOne("ST10174327_GiftOfTheGiversWebApp.Models.Disaster", "Disaster")
+                        .WithMany("GoodsAllocations")
+                        .HasForeignKey("DISASTER_ID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ST10174327_GiftOfTheGiversWebApp.Models.GoodsInventory", "GoodsInventory")
+                        .WithMany("GoodsAllocations")
+                        .HasForeignKey("GOODSINVENTORY_ID")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Disaster");
+
+                    b.Navigation("GoodsInventory");
+                });
+
+            modelBuilder.Entity("ST10174327_GiftOfTheGiversWebApp.Models.GoodsDonation", b =>
+                {
+                    b.HasOne("ST10174327_GiftOfTheGiversWebApp.Models.Disaster", "Disaster")
+                        .WithMany("GoodsDonations")
+                        .HasForeignKey("DISASTER_ID")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Disaster");
+                });
+
+            modelBuilder.Entity("ST10174327_GiftOfTheGiversWebApp.Models.GoodsPurchase", b =>
+                {
+                    b.HasOne("ST10174327_GiftOfTheGiversWebApp.Models.GoodsInventory", "GoodsInventory")
+                        .WithMany("GoodsPurchases")
+                        .HasForeignKey("GOODSINVENTORY_ID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("GoodsInventory");
+                });
+
+            modelBuilder.Entity("ST10174327_GiftOfTheGiversWebApp.Models.MoneyAllocation", b =>
+                {
+                    b.HasOne("ST10174327_GiftOfTheGiversWebApp.Models.Disaster", "Disaster")
+                        .WithMany("MoneyAllocations")
+                        .HasForeignKey("DISASTER_ID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Disaster");
+                });
+
+            modelBuilder.Entity("ST10174327_GiftOfTheGiversWebApp.Models.MoneyDonation", b =>
+                {
+                    b.HasOne("ST10174327_GiftOfTheGiversWebApp.Models.Disaster", "Disaster")
+                        .WithMany("MoneyDonations")
+                        .HasForeignKey("DISASTER_ID")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Disaster");
+                });
+
             modelBuilder.Entity("ST10174327_GiftOfTheGiversWebApp.Models.TaskAssignment", b =>
                 {
                     b.HasOne("ST10174327_GiftOfTheGiversWebApp.Models.VolunteerTask", "VolunteerTask")
@@ -648,6 +784,24 @@ namespace ST10174327_GiftOfTheGiversWebApp.Migrations
                     b.Navigation("Volunteer");
 
                     b.Navigation("VolunteerTask");
+                });
+
+            modelBuilder.Entity("ST10174327_GiftOfTheGiversWebApp.Models.Disaster", b =>
+                {
+                    b.Navigation("GoodsAllocations");
+
+                    b.Navigation("GoodsDonations");
+
+                    b.Navigation("MoneyAllocations");
+
+                    b.Navigation("MoneyDonations");
+                });
+
+            modelBuilder.Entity("ST10174327_GiftOfTheGiversWebApp.Models.GoodsInventory", b =>
+                {
+                    b.Navigation("GoodsAllocations");
+
+                    b.Navigation("GoodsPurchases");
                 });
 
             modelBuilder.Entity("ST10174327_GiftOfTheGiversWebApp.Models.Volunteer", b =>

@@ -1,56 +1,369 @@
-﻿@model IEnumerable<ST10174327_GiftOfTheGiversWebApp.Models.Volunteer>
+@model IEnumerable<ST10174327_GiftOfTheGiversWebApp.Models.Volunteer>
 
 @{
-    ViewData["Title"] = "Volunteer List";
+    ViewData["Title"] = "Volunteer Management";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container-fluid min-vh-100 py-4" style="background-color: #f8f9fa;">
-    <div class="container text-center">
-        <!-- Volunteer Image -->
-        <img src="~/images/Volunteer.png"
-             alt="Volunteer"
-             class="img-fluid mb-3"
-             style="max-height:200px;" />
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12 text-center mb-5">
+            <h1 class="display-4 fw-bold text-dark">
+                <i class="fas fa-users text-warning me-3"></i>Volunteer Management
+            </h1>
+            <p class="lead text-muted">Manage and coordinate our amazing team of volunteers</p>
+            <hr class="border-3 border-warning w-25 mx-auto" />
+        </div>
+    </div>
 
-        <h2 class="mb-3">Volunteer List</h2>
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
-        <p>
-            <a asp-action="Create" class="btn btn-success">Register New Volunteer</a>
-        </p>
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
-        <div class="table-responsive">
-            <table class="table table-striped table-bordered shadow-sm">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone Number</th>
-                        <th>Registration Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var volunteer in Model)
-                    {
-                        <tr>
-                            <td>@volunteer.Name</td>
-                            <td>@volunteer.Email</td>
-                            <td>@volunteer.PhoneNumber</td>
-                            <td>@volunteer.RegistrationDate.ToShortDateString()</td>
-                            <td>
-                                <!-- Show Edit button only if Admin or this is the logged-in user -->
-                                @if (User.IsInRole("Admin") || volunteer.Email == User.Identity.Name)
+    <!-- Quick Actions -->
+    <div class="row g-4 mb-5">
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-user-plus fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">Add Volunteer</h5>
+                        <p class="card-text text-muted">Register a new volunteer</p>
+                        <a href="@Url.Action("Create")" class="btn btn-success">
+                            <i class="fas fa-plus me-1"></i>Add Volunteer
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-tasks fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Available Tasks</h5>
+                    <p class="card-text text-muted">Browse volunteer opportunities</p>
+                    <a href="@Url.Action("Tasks")" class="btn btn-primary">
+                        <i class="fas fa-list me-1"></i>View Tasks
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-clipboard-list fa-3x text-info mb-3"></i>
+                    <h5 class="card-title">My Tasks</h5>
+                    <p class="card-text text-muted">View your assignments</p>
+                    <a href="@Url.Action("MyTasks")" class="btn btn-info">
+                        <i class="fas fa-user me-1"></i>My Tasks
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-chart-bar fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title">Statistics</h5>
+                    <p class="card-text text-muted">View volunteer stats</p>
+                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#statsModal">
+                        <i class="fas fa-chart-line me-1"></i>View Stats
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Volunteers Grid/List -->
+    <div class="row g-4">
+        @if (User.IsInRole("Admin"))
+        {
+            <!-- Admin View - All Volunteers -->
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-users me-2"></i>All Registered Volunteers
+                            <span class="badge bg-light text-dark ms-2">@Model.Count()</span>
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        @if (Model.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Skills</th>
+                                            <th>Status</th>
+                                            <th>Registration Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var volunteer in Model)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                                            <i class="fas fa-user"></i>
+                                                        </div>
+                                                        <div>
+                                                            <strong>@volunteer.Name</strong>
+                                                            @if (!string.IsNullOrEmpty(volunteer.Address))
+                                                            {
+                                                                <br><small class="text-muted">@volunteer.Address</small>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>@volunteer.Email</td>
+                                                <td>@volunteer.PhoneNumber</td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(volunteer.Skills))
+                                                    {
+                                                        <span class="badge bg-secondary">@volunteer.Skills</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">Not specified</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (volunteer.Status == "Active")
+                                                    {
+                                                        <span class="badge bg-success">
+                                                            <i class="fas fa-check-circle me-1"></i>Active
+                                                        </span>
+                                                    }
+                                                    else if (volunteer.Status == "Inactive")
+                                                    {
+                                                        <span class="badge bg-secondary">
+                                                            <i class="fas fa-pause-circle me-1"></i>Inactive
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-warning">
+                                                            <i class="fas fa-clock me-1"></i>@volunteer.Status
+                                                        </span>
+                                                    }
+                                                </td>
+                                                <td>@volunteer.RegistrationDate.ToString("MMM dd, yyyy")</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="@Url.Action("Details", new { id = volunteer.VolunteerID })"
+                                                           class="btn btn-outline-info" title="View Details">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                        <a href="@Url.Action("Edit", new { id = volunteer.VolunteerID })"
+                                                           class="btn btn-outline-primary" title="Edit Volunteer">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <i class="fas fa-users fa-4x text-muted mb-3"></i>
+                                <h5 class="text-muted">No volunteers registered yet</h5>
+                                <p class="text-muted">Be the first to join our volunteer team!</p>
+                                @if (User.IsInRole("Admin"))
                                 {
-                                    <a asp-action="Edit" asp-route-id="@volunteer.VolunteerID" class="btn btn-sm btn-primary">Edit</a>
+                                    <a href="@Url.Action("Create")" class="btn btn-primary">
+                                        <i class="fas fa-plus me-1"></i>Add First Volunteer
+                                    </a>
                                 }
+                                else
+                                {
+                                    <a href="@Url.Action("Register")" class="btn btn-success">
+                                        <i class="fas fa-user-plus me-1"></i>Register as Volunteer
+                                    </a>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- User View - Personal Profile -->
+            @foreach (var volunteer in Model)
+            {
+                <div class="col-lg-8 mx-auto">
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-header bg-success text-white text-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-user-circle me-2"></i>Your Volunteer Profile
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 text-center">
+                                    <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                                        <i class="fas fa-user fa-2x"></i>
+                                    </div>
+                                    <h5>@volunteer.Name</h5>
+                                    <p class="text-muted">@volunteer.Email</p>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <p><strong>Phone:</strong> @volunteer.PhoneNumber</p>
+                                            @if (!string.IsNullOrEmpty(volunteer.Address))
+                                            {
+                                                <p><strong>Address:</strong> @volunteer.Address</p>
+                                            }
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <p><strong>Status:</strong>
+                                                @if (volunteer.Status == "Active")
+                                                {
+                                                    <span class="badge bg-success">Active</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">@volunteer.Status</span>
+                                                }
+                                            </p>
+                                            <p><strong>Joined:</strong> @volunteer.RegistrationDate.ToString("MMM dd, yyyy")</p>
+                                        </div>
+                                    </div>
 
-                                <a asp-action="Details" asp-route-id="@volunteer.VolunteerID" class="btn btn-sm btn-info ms-1">Details</a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                                    @if (!string.IsNullOrEmpty(volunteer.Skills))
+                                    {
+                                        <div class="mb-3">
+                                            <strong>Skills:</strong>
+                                            <div class="mt-1">
+                                                <span class="badge bg-primary">@volunteer.Skills</span>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    @if (!string.IsNullOrEmpty(volunteer.Availability))
+                                    {
+                                        <div class="mb-3">
+                                            <strong>Availability:</strong> @volunteer.Availability
+                                        </div>
+                                    }
+
+                                    <div class="d-grid gap-2 d-md-flex">
+                                        <a href="@Url.Action("Tasks")" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-tasks me-1"></i>Browse Tasks
+                                        </a>
+                                        <a href="@Url.Action("MyTasks")" class="btn btn-info btn-sm">
+                                            <i class="fas fa-clipboard-list me-1"></i>My Tasks
+                                        </a>
+                                        <a href="@Url.Action("Edit", new { id = volunteer.VolunteerID })" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-edit me-1"></i>Update Profile
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<!-- Statistics Modal -->
+<div class="modal fade" id="statsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">
+                    <i class="fas fa-chart-bar me-2"></i>Volunteer Statistics
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="border-end">
+                            <h2 class="text-primary">@Model.Count()</h2>
+                            <p class="text-muted mb-0">Total Volunteers</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border-end">
+                            <h2 class="text-success">@Model.Count(v => v.Status == "Active")</h2>
+                            <p class="text-muted mb-0">Active Volunteers</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h2 class="text-info">@Model.Where(v => !string.IsNullOrEmpty(v.Skills)).Count()</h2>
+                        <p class="text-muted mb-0">With Skills Listed</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.875rem;
+        letter-spacing: 0.5px;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        transition: transform 0.3s ease;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            document.querySelectorAll('.alert-success, .alert-danger').forEach(function(alert) {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+
+        // Initialize tooltips
+        document.querySelectorAll('[title]').forEach(function(el) {
+            new bootstrap.Tooltip(el);
+        });
+    </script>
+}

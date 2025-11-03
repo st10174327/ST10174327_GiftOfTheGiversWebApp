@@ -1,97 +1,269 @@
-﻿@model ST10174327_GiftOfTheGiversWebApp.Models.GoodsDonation
+@model ST10174327_GiftOfTheGiversWebApp.Models.GoodsDonation
 
 @{
     ViewData["Title"] = "Donate Goods";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
-    <h2 class="mb-3">Donate Goods</h2>
-    <hr />
-
-    <p class="text-muted">
-        Please fill out the form below to record your goods donation. Providing accurate details ensures that the donated items can be allocated efficiently to those in need.
-    </p>
-
+<div class="container my-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <form asp-action="Create" class="needs-validation" novalidate>
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                <input asp-for="USERNAME" type="hidden" value="@User.Identity.Name" />
-
-                <div class="mb-3">
-                    <label asp-for="DATE" class="form-label">Donation Date</label>
-                    <input asp-for="DATE" class="form-control" type="date" />
-                    <span asp-validation-for="DATE" class="text-danger"></span>
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-success text-white text-center py-3">
+                    <h4 class="mb-0">
+                        <i class="fas fa-gift me-2"></i>
+                        Donate Goods
+                    </h4>
+                    <small class="text-white-50">Help us provide essential supplies to those in need</small>
                 </div>
 
-                <div class="mb-3">
-                    <label asp-for="ITEM_COUNT" class="form-label">Number of Items</label>
-                    <input asp-for="ITEM_COUNT" class="form-control" type="number" min="1" />
-                    <span asp-validation-for="ITEM_COUNT" class="text-danger"></span>
-                </div>
+                <div class="card-body p-4">
+                    <!-- Success Message -->
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
 
-                <div class="mb-3">
-                    <label asp-for="CATEGORY" class="form-label">Category</label>
-                    <select asp-for="CATEGORY" class="form-select">
-                        <option value="">-- Select a Category --</option>
-                        <option>Cloths</option>
-                        <option>Non-Perishable Foods</option>
-                        @if (ViewBag.CategoryList != null)
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p class="text-muted mb-4">
+                                Your generous donation of goods will directly help families and communities affected by disasters.
+                                Please provide accurate details to ensure efficient allocation and distribution.
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="bg-light rounded p-3">
+                                <i class="fas fa-box-open fa-3x text-success mb-2"></i>
+                                <p class="small text-muted mb-0">Track your donation's impact</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form asp-action="Create" class="needs-validation" novalidate>
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <input asp-for="USERNAME" type="hidden" value="@(User.Identity?.Name ?? "")" />
+
+                        <!-- Donation Date -->
+                        <div class="mb-3">
+                            <label asp-for="DATE" class="form-label fw-bold">
+                                <i class="fas fa-calendar me-1"></i>Donation Date
+                            </label>
+                            <input asp-for="DATE" class="form-control" type="date" />
+                            <span asp-validation-for="DATE" class="text-danger"></span>
+                        </div>
+
+                        <!-- Category and Quantity -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CATEGORY" class="form-label fw-bold">
+                                    <i class="fas fa-tags me-1"></i>Item Category
+                                </label>
+                                <select asp-for="CATEGORY" class="form-select">
+                                    <option value="">-- Select a Category --</option>
+                                    <option value="Food">🍎 Food Items</option>
+                                    <option value="Clothing">👕 Clothing</option>
+                                    <option value="Medical Supplies">🏥 Medical Supplies</option>
+                                    <option value="Blankets">🛏️ Blankets & Bedding</option>
+                                    <option value="Water">💧 Water & Beverages</option>
+                                    <option value="Hygiene Products">🧴 Hygiene Products</option>
+                                    <option value="School Supplies">📚 School Supplies</option>
+                                    <option value="Baby Items">👶 Baby Items</option>
+                                    <option value="Tools">🔧 Tools & Equipment</option>
+                                    <option value="Other">📦 Other</option>
+                                </select>
+                                <span asp-validation-for="CATEGORY" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ITEM_COUNT" class="form-label fw-bold">
+                                    <i class="fas fa-hashtag me-1"></i>Quantity
+                                </label>
+                                <input asp-for="ITEM_COUNT" class="form-control" type="number" min="1" placeholder="Enter number of items" />
+                                <span asp-validation-for="ITEM_COUNT" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Disaster Allocation -->
+                        @if (ViewBag.AvailableDisasters != null && ((List<ST10174327_GiftOfTheGiversWebApp.Models.Disaster>)ViewBag.AvailableDisasters).Any())
                         {
-                            foreach (var category in ViewBag.CategoryList as List<string>)
-                            {
-                                <option value="@category">@category</option>
-                            }
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Allocate to Active Disaster (Optional)
+                                </label>
+                                <select asp-for="DISASTER_ID" class="form-select">
+                                    <option value="">-- Select a disaster to allocate to (optional) --</option>
+                                    @foreach (var disaster in (List<ST10174327_GiftOfTheGiversWebApp.Models.Disaster>)ViewBag.AvailableDisasters)
+                                    {
+                                        <option value="@disaster.DISASTER_ID">
+                                            @disaster.DisasterName - @disaster.LOCATION (@disaster.AID_TYPE)
+                                        </option>
+                                    }
+                                </select>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Selecting a disaster will prioritize your donation for that specific relief effort.
+                                </div>
+                            </div>
                         }
-                    </select>
-                    <span asp-validation-for="CATEGORY" class="text-danger"></span>
-                </div>
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>No active disasters available for allocation.</strong> Your donation will be stored in inventory and allocated as needed.
+                            </div>
+                        }
 
-                <div class="mb-3">
-                    <label asp-for="DESCRIPTION" class="form-label">Description / Notes</label>
-                    <textarea asp-for="DESCRIPTION" class="form-control" rows="3" placeholder="Optional details about the items donated"></textarea>
-                    <span asp-validation-for="DESCRIPTION" class="text-danger"></span>
-                </div>
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label asp-for="DESCRIPTION" class="form-label fw-bold">
+                                <i class="fas fa-align-left me-1"></i>Description / Notes
+                            </label>
+                            <textarea asp-for="DESCRIPTION" class="form-control" rows="3"
+                                      placeholder="Optional: Provide details about the items (condition, size, specific requirements, etc.)"></textarea>
+                            <span asp-validation-for="DESCRIPTION" class="text-danger"></span>
+                        </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Donor Information</label><br />
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" asp-for="DONOR" name="DONOR" value="Anonymous" />
-                        <label class="form-check-label">Anonymous</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" asp-for="DONOR" name="DONOR" value="@User.Identity.Name" checked />
-                        <label class="form-check-label">Myself</label>
-                    </div>
-                    <span asp-validation-for="DONOR" class="text-danger"></span>
-                </div>
+                        <!-- Donor Information -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-user me-1"></i>Donor Information
+                            </label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="DONOR" name="DONOR" value="Anonymous" id="anonymous" />
+                                <label class="form-check-label" for="anonymous">
+                                    <i class="fas fa-user-secret me-1"></i>Donate Anonymously
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="DONOR" name="DONOR" value="@User.Identity.Name" id="myself" checked />
+                                <label class="form-check-label" for="myself">
+                                    <i class="fas fa-user me-1"></i>Attribute to Myself (@(User.Identity?.Name ?? "User"))
+                                </label>
+                            </div>
+                            <span asp-validation-for="DONOR" class="text-danger"></span>
+                        </div>
 
-                <button type="submit" class="btn btn-primary w-100">Submit Donation</button>
-                <a asp-action="Index" class="btn btn-secondary mt-2 w-100">Back to List</a>
-            </form>
+                        <!-- Impact Preview -->
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-heart me-2"></i>Your Impact</h6>
+                            <p class="mb-0">
+                                Your donation will help provide essential supplies to families and communities in need.
+                                Every item donated makes a real difference in disaster relief efforts.
+                            </p>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg me-md-2">
+                                <i class="fas fa-arrow-left me-1"></i>Back to My Donations
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-gift me-2"></i>Submit Donation
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body text-center p-3">
+                    <small class="text-muted">
+                        <i class="fas fa-question-circle me-1"></i>
+                        Need help? Contact our donation team at
+                        <a href="mailto:donations@giftofthegivers.org" class="text-decoration-none">
+                            donations@giftofthegivers.org
+                        </a>
+                    </small>
+                </div>
+            </div>
         </div>
-    </div>
-
-    <div class="mt-4">
-        <p class="text-muted small">
-            Once you submit this form, your donation will be logged in the system. Administrators will review and allocate the donated goods to the appropriate disaster relief or community aid programs. Ensure that the number of items and category selected accurately reflect what you are donating.
-        </p>
     </div>
 </div>
 
+<style>
+    .form-control:focus, .form-select:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+
+    .btn-success {
+        background: linear-gradient(45deg, #28a745, #218838);
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-success:hover {
+        background: linear-gradient(45deg, #218838, #28a745);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    .alert-info {
+        border-left: 4px solid #0dcaf0;
+        background-color: #f8f9fa;
+    }
+
+    .form-check-input:checked {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+</style>
+
 @section Scripts {
-    @await Html.PartialAsync("_ValidationScriptsPartial")
+    <partial name="_ValidationScriptsPartial" />
+
     <script>
-        // Optional: Ensure item count is a positive integer
-        $(document).ready(function () {
-            $("input[name='ITEM_COUNT']").on("input", function () {
-                var val = parseInt($(this).val());
-                if (isNaN(val) || val < 1) {
-                    $(this).val("");
+        // Update impact preview based on quantity and category
+        function updateImpactPreview() {
+            const quantity = parseInt(document.querySelector('input[name="ITEM_COUNT"]').value) || 0;
+            const category = document.querySelector('select[name="CATEGORY"]').value;
+            const impactDiv = document.querySelector('.alert-info');
+
+            if (quantity > 0 && category) {
+                let impactText = '';
+                switch(category.toLowerCase()) {
+                    case 'food':
+                        impactText = `${quantity} food items can help feed approximately ${Math.floor(quantity / 5)} families for a day.`;
+                        break;
+                    case 'clothing':
+                        impactText = `${quantity} clothing items can provide essentials for ${quantity} people in need.`;
+                        break;
+                    case 'medical supplies':
+                        impactText = `${quantity} medical supplies can help treat ${quantity} patients in emergency situations.`;
+                        break;
+                    default:
+                        impactText = `${quantity} ${category.toLowerCase()} items will support disaster relief efforts.`;
                 }
-            });
-        });
+
+                impactDiv.innerHTML = `
+                    <h6><i class="fas fa-heart me-2"></i>Your Impact</h6>
+                    <p class="mb-0">${impactText}</p>
+                `;
+            }
+        }
+
+        // Add event listeners
+        document.querySelector('input[name="ITEM_COUNT"]').addEventListener('input', updateImpactPreview);
+        document.querySelector('select[name="CATEGORY"]').addEventListener('change', updateImpactPreview);
+
+        // Auto-hide success message
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>
+            setTimeout(function() {
+                const alert = document.querySelector('.alert-success');
+                if (alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, 5000);
+            </text>
+        }
     </script>
 }

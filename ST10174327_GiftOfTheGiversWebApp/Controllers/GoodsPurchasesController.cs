@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,12 +22,12 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         // GET: GoodsPurchases
         public async Task<IActionResult> Index()
         {
-            var firstMoneyRecord = await _context.Money.FirstOrDefaultAsync();
+            var firstMoneyRecord = await _context.Moneys.FirstOrDefaultAsync();
             decimal availableMoney = firstMoneyRecord?.RemainingMoney ?? 0;
             ViewBag.AvailableMoney = availableMoney;
 
-            var purchases = await _context.GoodsPurchase.ToListAsync();
-            return View(purchases);
+            var goodsPurchases = await _context.GoodsPurchases.ToListAsync();
+            return View(goodsPurchases);
         }
 
         // GET: GoodsPurchases/Create
@@ -48,7 +48,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
                 return View(goodsPurchase);
             }
 
-            var firstMoneyRecord = await _context.Money.FirstOrDefaultAsync();
+            var firstMoneyRecord = await _context.Moneys.FirstOrDefaultAsync();
             if (firstMoneyRecord == null)
             {
                 ModelState.AddModelError("", "No money record found. Cannot make purchase.");
@@ -66,27 +66,27 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             }
 
             // Update or create inventory record
-            var inventoryItem = await _context.GoodsInventory.FirstOrDefaultAsync(g => g.CATEGORY == goodsPurchase.CATEGORY);
+            var inventoryItem = await _context.GoodsInventories.FirstOrDefaultAsync(g => g.CATEGORY == goodsPurchase.CATEGORY);
             if (inventoryItem != null)
             {
                 inventoryItem.ITEM_COUNT += goodsPurchase.ITEM_COUNT;
-                _context.GoodsInventory.Update(inventoryItem);
+                _context.GoodsInventories.Update(inventoryItem);
             }
             else
             {
-                _context.GoodsInventory.Add(new GoodsInventory
+                _context.GoodsInventories.Add(new GoodsInventory
                 {
-                    CATEGORY = goodsPurchase.CATEGORY,
+                    CATEGORY = goodsPurchase.CATEGORY ?? "Unknown",
                     ITEM_COUNT = goodsPurchase.ITEM_COUNT
                 });
             }
 
             // Update money
             firstMoneyRecord.RemainingMoney -= totalCost;
-            _context.Money.Update(firstMoneyRecord);
+            _context.Moneys.Update(firstMoneyRecord);
 
             // Add purchase (no need to assign GoodsTotalPrice explicitly)
-            _context.GoodsPurchase.Add(goodsPurchase);
+            _context.GoodsPurchases.Add(goodsPurchase);
 
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = "Goods purchased successfully!";
@@ -97,10 +97,10 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         // Utility: Load ViewData for dropdowns and money info
         private async Task LoadViewDataAsync()
         {
-            var firstMoneyRecord = await _context.Money.FirstOrDefaultAsync();
+            var firstMoneyRecord = await _context.Moneys.FirstOrDefaultAsync();
             ViewBag.AvailableMoney = firstMoneyRecord?.RemainingMoney ?? 0;
 
-            var categories = await _context.GoodsDonation
+            var categories = await _context.GoodsDonations
                 .Select(g => g.CATEGORY)
                 .Distinct()
                 .ToListAsync();

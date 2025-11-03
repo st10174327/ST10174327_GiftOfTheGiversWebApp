@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -18,12 +18,27 @@ namespace ST10174327_GiftOfTheGiversWebApp.Models
         public int VolunteerID { get; set; }
 
         /// <summary>
-        /// Full name of the volunteer.
+        /// First name of the volunteer.
         /// </summary>
-        [Required(ErrorMessage = "Name is required")]
-        [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters")]
+        [Required(ErrorMessage = "First name is required")]
+        [StringLength(50, ErrorMessage = "First name cannot exceed 50 characters")]
+        [Display(Name = "First Name")]
+        public required string FirstName { get; set; }
+
+        /// <summary>
+        /// Last name of the volunteer.
+        /// </summary>
+        [Required(ErrorMessage = "Last name is required")]
+        [StringLength(50, ErrorMessage = "Last name cannot exceed 50 characters")]
+        [Display(Name = "Last Name")]
+        public required string LastName { get; set; }
+
+        /// <summary>
+        /// Full name of the volunteer (computed property).
+        /// </summary>
+        [NotMapped]
         [Display(Name = "Full Name")]
-        public required string Name { get; set; }
+        public string FullName => $"{FirstName} {LastName}";
 
         /// <summary>
         /// Email address of the volunteer.
@@ -31,7 +46,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Models
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress(ErrorMessage = "Invalid email address format")]
         [Display(Name = "Email Address")]
-        public required string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         /// <summary>
         /// Phone number of the volunteer.
@@ -39,7 +54,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Models
         [Required(ErrorMessage = "Phone number is required")]
         [Phone(ErrorMessage = "Invalid phone number format")]
         [Display(Name = "Phone Number")]
-        public required string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
 
         /// <summary>
         /// Residential address of the volunteer (optional).
@@ -85,6 +100,11 @@ namespace ST10174327_GiftOfTheGiversWebApp.Models
         public string? Skills { get; set; }
 
         /// <summary>
+        /// Collection of task assignments for this volunteer.
+        /// </summary>
+        public virtual ICollection<TaskAssignment> Tasks { get; set; } = new List<TaskAssignment>();
+
+        /// <summary>
         /// Indicates whether the volunteer is currently active.
         /// </summary>
         [Display(Name = "Active")]
@@ -117,10 +137,5 @@ namespace ST10174327_GiftOfTheGiversWebApp.Models
         [DataType(DataType.Date)]
         [Display(Name = "Date of Birth")]
         public DateTime? DateOfBirth { get; set; }
-
-        /// <summary>
-        /// Navigation property: A volunteer can have multiple task assignments.
-        /// </summary>
-        public ICollection<TaskAssignment> Tasks { get; set; } = new List<TaskAssignment>();
     }
 } 

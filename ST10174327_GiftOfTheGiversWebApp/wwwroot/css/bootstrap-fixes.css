@@ -1,0 +1,108 @@
+/* Fix for Bootstrap CSS vendor prefix errors */
+
+/* Override problematic toast-container styles */
+.toast-container {
+  width: max-content;
+  max-width: 100%;
+  pointer-events: none;
+}
+
+/* Fix for any dropdown menu width issues */
+.dropdown-menu {
+  width: auto;
+  min-width: 180px;
+  white-space: nowrap;
+}
+
+/* Fix for any other vendor prefix issues */
+* {
+  /* Remove deprecated vendor prefixes that cause errors */
+  padding-inline-start: inherit;
+  margin-inline-end: inherit;
+}
+
+/* Modern CSS Grid and Flexbox fixes */
+.container-fluid {
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+/* Ensure proper box-sizing */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Additional vendor prefix fixes */
+
+/* Fix for Bootstrap navigation and list items */
+.nav-item {
+  margin-inline-end: inherit;
+}
+
+.nav-link {
+  padding-inline-start: inherit;
+  margin-inline-end: inherit;
+}
+
+.form-control {
+  margin-inline-end: inherit;
+  padding-inline-start: inherit;
+}
+
+.btn {
+  margin-inline-end: inherit;
+}
+
+.card {
+  margin-inline-end: inherit;
+}
+
+.alert {
+  margin-inline-end: inherit;
+  padding-inline-start: inherit;
+}
+
+.breadcrumb-item {
+  padding-inline-start: inherit;
+  margin-inline-end: inherit;
+}
+
+.page-link {
+  margin-inline-end: inherit;
+  padding-inline-start: inherit;
+}
+
+.list-group-item {
+  padding-inline-start: inherit;
+  margin-inline-end: inherit;
+}
+
+.badge {
+  margin-inline-end: inherit;
+}
+
+.progress {
+  margin-inline-end: inherit;
+}
+
+.tooltip {
+  margin-inline-end: inherit;
+  padding-inline-start: inherit;
+}
+
+.popover {
+  margin-inline-end: inherit;
+  padding-inline-start: inherit;
+}
+
+/* Reset any remaining webkit prefixes */
+[class*="webkit"] {
+  margin-inline-end: inherit !important;
+  padding-inline-start: inherit !important;
+}

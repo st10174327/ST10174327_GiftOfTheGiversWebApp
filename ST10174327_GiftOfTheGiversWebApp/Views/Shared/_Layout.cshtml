@@ -6,120 +6,353 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Gift of the Givers</title>
+    <title>@ViewData["Title"] - Gift of the Givers Foundation</title>
+
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- Bootstrap CSS Fixes (overrides vendor prefix errors) -->
+    <link rel="stylesheet" href="~/css/bootstrap-fixes.css" asp-append-version="true" />
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+    <!-- Additional CSS for modern styling -->
+    <style>
+        :root {
+            --primary-color: #dc3545;
+            --secondary-color: #ffc107;
+            --success-color: #28a745;
+            --info-color: #17a2b8;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .navbar-brand i {
+            margin-right: 0.5rem;
+            color: var(--secondary-color);
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color), #c82333);
+            color: white;
+            padding: 4rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .hero-section h1 {
+            font-weight: 700;
+            font-size: 3rem;
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary-color), #c82333);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #c82333, var(--primary-color));
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, var(--warning-color), #e0a800);
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, var(--success-color), #218838);
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .feature-card i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .stats-counter {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .footer {
+            background: var(--dark-color);
+            color: white;
+            padding: 3rem 0 1rem;
+            margin-top: 4rem;
+        }
+
+        .footer a {
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            color: white;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-            <div class="container">
-                <a class="navbar-brand" href="/">
-                    <i class="fas fa-hands-helping"></i> Gift of the Givers
-                </a>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-hands-helping"></i> Gift of the Givers Foundation
+            </a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-light" href="@Url.Action("Index", "Home")">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" href="@Url.Action("About", "Home")">About</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" href="@Url.Action("Contact", "Home")">Contact</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" href="@Url.Action("News", "Home")">News</a>
-                        </li>
-                        @if (SignInManager.IsSignedIn(User))
+            <div class="navbar-collapse collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Disaster/Report">Report Disaster</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Donate/Goods">Donate Goods</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Donate/Money">Donate Money</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Volunteer/Register">Volunteer</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("About", "Home")">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Contact", "Home")">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("News", "Home")">News</a>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav">
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        @if (User.IsInRole("Admin"))
                         {
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-light" href="@Url.Action("Dashboard", "Admin")">Admin Dashboard</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-light" href="@Url.Action("Index", "Disasters")">Manage Disasters</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-light" href="@Url.Action("Index", "GoodsDonations")">All Goods Donations</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-light" href="@Url.Action("Index", "MoneyDonations")">All Money Donations</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-light" href="@Url.Action("Index", "AdminVolunteer")">Volunteer Management</a>
-                                </li>
-                            }
-                            else
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-light" href="@Url.Action("Index", "UserDisasters")">My Disasters</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-light" href="@Url.Action("Index", "UserGoodsDonations")">My Goods Donations</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-light" href="@Url.Action("Index", "UserMoneyDonations")">My Money Donations</a>
-                                </li>
-                            }
-                        }
-                    </ul>
-
-                    <ul class="navbar-nav">
-                        @if (SignInManager.IsSignedIn(User))
-                        {
-                            <li class="nav-item">
-                                <span class="navbar-text text-light">Welcome, @UserManager.GetUserName(User)!</span>
-                            </li>
-                            <li class="nav-item">
-                                <form class="d-inline" method="post" asp-area="Identity" asp-page="/Account/Logout">
-                                    <button type="submit" class="btn btn-link nav-link text-light">Logout</button>
-                                </form>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-cog me-1"></i>Administration
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="@Url.Action("Dashboard", "Admin")">
+                                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="@Url.Action("Index", "Disasters")">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>Manage Disasters
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="@Url.Action("Index", "GoodsDonations")">
+                                        <i class="fas fa-box me-2"></i>All Goods Donations
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="@Url.Action("Index", "MoneyDonations")">
+                                        <i class="fas fa-dollar-sign me-2"></i>All Money Donations
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="@Url.Action("Index", "AdminVolunteer")">
+                                        <i class="fas fa-users me-2"></i>Volunteer Management
+                                    </a></li>
+                                </ul>
                             </li>
                         }
                         else
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Register">Register</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Login">Login</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-user me-1"></i>My Account
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="@Url.Action("Index", "UserDisasters")">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>My Disasters
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="@Url.Action("Index", "UserGoodsDonations")">
+                                        <i class="fas fa-box me-2"></i>My Goods Donations
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="@Url.Action("Index", "UserMoneyDonations")">
+                                        <i class="fas fa-dollar-sign me-2"></i>My Money Donations
+                                    </a></li>
+                                </ul>
                             </li>
                         }
-                    </ul>
-                </div>
+                    }
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle me-1"></i> @User.Identity?.Name
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                                <a class="dropdown-item" href="/Identity/Account/Manage" asp-area="Identity" asp-page="/Account/Manage/Index">
+                                    <i class="fas fa-user-cog me-2"></i>Profile
+                                </a>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a class="dropdown-item" href="/Admin">
+                                        <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
+                                    </a>
+                                }
+                                <div class="dropdown-divider"></div>
+                                <form id="logoutForm" class="dropdown-item" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                                    <button type="submit" class="btn btn-link text-dark p-0">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </button>
+                                </form>
+                            </div>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Identity/Account/Login" asp-area="Identity" asp-page="/Account/Login">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Identity/Account/Register" asp-area="Identity" asp-page="/Account/Register">Register</a>
+                        </li>
+                    }
             </div>
-        </nav>
-    </header>
+        </div>
+    </nav>
 
-    <main role="main" class="pb-3">
+    <!-- Hidden logout form -->
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <form id="logout-form" method="post" asp-area="Identity" asp-page="/Account/Logout" style="display: none;"></form>
+    }
+
+    <!-- Main Content -->
+    <main role="main">
+        @if (ViewData["ShowHero"]?.ToString() == "true")
+        {
+            <section class="hero-section">
+                <div class="container text-center">
+                    <h1>Disaster Relief & Humanitarian Aid</h1>
+                    <p class="lead">Making a difference in communities affected by natural disasters and emergencies</p>
+                    @if (!SignInManager.IsSignedIn(User))
+                    {
+                        <div class="mt-4">
+                            <a href="/Identity/Account/Register" class="btn btn-light btn-lg me-3" asp-area="Identity" asp-page="/Account/Register">
+                                <i class="fas fa-user-plus me-2"></i>Get Started
+                            </a>
+                            <a href="@Url.Action("About", "Home")" class="btn btn-outline-light btn-lg">
+                                <i class="fas fa-info-circle me-2"></i>Learn More
+                            </a>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+
         @RenderBody()
     </main>
 
-    <footer class="border-top footer text-muted bg-light">
+    <!-- Footer -->
+    <footer class="footer">
         <div class="container">
             <div class="row">
-                <div class="col-md-6">
-                    <p>&copy; 2024 - Gift of the Givers Foundation</p>
+                <div class="col-lg-4 mb-3">
+                    <h5><i class="fas fa-hands-helping me-2"></i>Gift of the Givers Foundation</h5>
+                    <p>Providing swift and effective aid to communities struck by natural disasters and emergencies.</p>
                 </div>
-                <div class="col-md-6 text-end">
-                    <p>Bringing hope to those in need</p>
+                <div class="col-lg-2 col-md-6 mb-3">
+                    <h6>Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="@Url.Action("Index", "Home")">Home</a></li>
+                        <li><a href="@Url.Action("About", "Home")">About</a></li>
+                        <li><a href="@Url.Action("Contact", "Home")">Contact</a></li>
+                        <li><a href="@Url.Action("News", "Home")">News</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-3">
+                    <h6>Get Involved</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="@Url.Action("Create", "UserDisasters")">Report Disaster</a></li>
+                        <li><a href="@Url.Action("Create", "UserGoodsDonations")">Donate Goods</a></li>
+                        <li><a href="@Url.Action("Create", "UserMoneyDonations")">Donate Money</a></li>
+                        <li><a href="@Url.Action("Index", "AdminVolunteer")">Volunteer</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 mb-3">
+                    <h6>Contact Information</h6>
+                    <p>
+                        <i class="fas fa-map-marker-alt me-2"></i>South Africa<br>
+                        <i class="fas fa-phone me-2"></i>+27 (0) 21 555 1234<br>
+                        <i class="fas fa-envelope me-2"></i>info@giftofthegivers.org
+                    </p>
+                </div>
+            </div>
+            <hr class="my-3">
+            <div class="row">
+                <div class="col-md-6">
+                    <p>&copy; @DateTime.Now.Year Gift of the Givers Foundation. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="me-3"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="me-3"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="me-3"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="me-3"><i class="fab fa-linkedin-in"></i></a>
                 </div>
             </div>
         </div>
     </footer>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap JS -->
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JavaScript -->
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
