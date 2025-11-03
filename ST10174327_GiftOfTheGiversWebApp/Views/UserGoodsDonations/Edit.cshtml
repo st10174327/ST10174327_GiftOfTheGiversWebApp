@@ -29,9 +29,9 @@
                 <option value="">-- Select a Category --</option>
                 <option value="Cloths">Cloths</option>
                 <option value="Non-Perishable Foods">Non-Perishable Foods</option>
-                @if (ViewBag.CategoryList != null)
+                @if (ViewBag.CategoryList is List<string> categoryList && categoryList.Any())
                 {
-                    foreach (var category in ViewBag.CategoryList as List<string>)
+                    foreach (var category in categoryList)
                     {
                         if (Model.CATEGORY == category)
                         {
@@ -81,4 +81,4 @@
             });
         });
     </script>
-}  
+}

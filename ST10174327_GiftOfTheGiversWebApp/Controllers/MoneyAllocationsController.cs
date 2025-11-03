@@ -31,7 +31,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
                 .Select(d => new SelectListItem
                 {
                     Value = d.DISASTER_ID.ToString(),
-                    Text = $"{d.DisasterName} - {d.AID_TYPE}"  // FIXED: Changed AidType to AID_TYPE
+                    Text = $"{d.DisasterName} - {d.AID_TYPE}"
                 })
                 .ToList();
 
@@ -53,7 +53,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             }
 
             var allocations = await _context.MoneyAllocation
-                .Include(m => m.Disaster)  // Eager load the Disaster data
+                .Include(m => m.Disaster)
                 .OrderByDescending(m => m.AllocationDate)
                 .ToListAsync();
 
@@ -70,7 +70,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         // Handle POST create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("AllocationAmount,DISASTER_ID")] MoneyAllocation moneyAllocation)  // FIXED: Changed DisasterId to DISASTER_ID
+        public async Task<IActionResult> Create([Bind("AllocationAmount,DISASTER_ID")] MoneyAllocation moneyAllocation)
         {
             var money = _context.Money.FirstOrDefault();
 
@@ -93,11 +93,11 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
                     moneyAllocation.AllocationDate = DateTime.UtcNow.Date;
 
                     var selectedDisaster = await _context.Disaster
-                        .FirstOrDefaultAsync(d => d.DISASTER_ID == moneyAllocation.DISASTER_ID);  // FIXED: Changed DisasterId to DISASTER_ID
+                        .FirstOrDefaultAsync(d => d.DISASTER_ID == moneyAllocation.DISASTER_ID);
 
                     if (selectedDisaster != null)
                     {
-                        moneyAllocation.AidType = selectedDisaster.AID_TYPE;  // FIXED: Changed AidType to AID_TYPE
+                        moneyAllocation.AidType = selectedDisaster.AID_TYPE;
 
                         // Deduct from remaining money
                         money.RemainingMoney -= moneyAllocation.AllocationAmount;
@@ -112,17 +112,20 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
                         return RedirectToAction(nameof(Index));
                     }
 
-                    ModelState.AddModelError("DISASTER_ID", "Selected disaster not found.");  // FIXED: Changed DisasterId to DISASTER_ID
+                    ModelState.AddModelError("DISASTER_ID", "Selected disaster not found.");
                 }
             }
 
-            // Log validation errors
+            // Log validation errors - REMOVED the ModelState.Keys null check
             foreach (var key in ModelState.Keys)
             {
-                var errors = ModelState[key].Errors;
-                foreach (var error in errors)
+                var entry = ModelState[key];
+                if (entry?.Errors != null)
                 {
-                    _logger.LogError($"Validation error for {key}: {error.ErrorMessage}");
+                    foreach (var error in entry.Errors)
+                    {
+                        _logger.LogError($"Validation error for {key}: {error.ErrorMessage}");
+                    }
                 }
             }
 

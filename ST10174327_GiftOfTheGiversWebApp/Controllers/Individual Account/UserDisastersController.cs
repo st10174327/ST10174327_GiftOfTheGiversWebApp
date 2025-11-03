@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ST10174327_GiftOfTheGiversWebApp.Data;
@@ -116,7 +116,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,User")]
-        public async Task<IActionResult> Edit(int id, [Bind("DISTATER_ID,STARTDATE,ENDDATE,LOCATION,AID_TYPE")] Disaster disaster)
+        public async Task<IActionResult> Edit(int id, [Bind("DISASTER_ID,STARTDATE,ENDDATE,LOCATION,AID_TYPE")] Disaster disaster)
         {
             var existingDisaster = await _context.Disaster.FindAsync(id);
             if (existingDisaster == null) return NotFound();

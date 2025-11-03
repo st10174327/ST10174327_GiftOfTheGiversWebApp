@@ -28,7 +28,7 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             // Admin sees all, users see only their reports
             var disasters = User.IsInRole("Admin")
                 ? await _context.Disaster.ToListAsync()
-                : await _context.Disaster.Where(d => d.USERNAME == User.Identity.Name).ToListAsync();
+                : await _context.Disaster.Where(d => d.USERNAME == User.Identity!.Name).ToListAsync();
 
             return View(disasters);
         }
@@ -71,7 +71,8 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             if (!ModelState.IsValid)
                 return View(disaster);
 
-            disaster.USERNAME = User.Identity.Name;
+            // Fixed: Added null check for User.Identity.Name
+            disaster.USERNAME = User.Identity?.Name ?? "Unknown";
 
             if (disaster.STARTDATE < DateTime.Now.Date)
             {
@@ -187,7 +188,8 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
 
         private bool DisasterExists(int id)
         {
-            return _context.Disaster.Any(e => e.DISASTER_ID == id);
+            // Fixed: Added null check for _context.Disaster
+            return _context.Disaster?.Any(e => e.DISASTER_ID == id) ?? false;
         }
     }
-} 
+}

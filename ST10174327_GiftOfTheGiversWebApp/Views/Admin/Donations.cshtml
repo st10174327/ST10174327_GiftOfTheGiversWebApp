@@ -1,0 +1,111 @@
+@model ST10174327_GiftOfTheGiversWebApp.Models.ViewModels.DonationsViewModel
+
+@{
+    ViewData["Title"] = "Manage Donations";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Manage Donations</h1>
+        </div>
+    </div>
+
+    <!-- Money Donations -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Money Donations</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Donor</th>
+                                    <th>Username</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Disaster</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var donation in Model.MoneyDonations)
+                                {
+                                    <tr>
+                                        <td>@(string.IsNullOrEmpty(donation.DONOR) ? "Anonymous" : donation.DONOR)</td>
+                                        <td>@donation.USERNAME</td>
+                                        <td>@donation.AMOUNT.ToString("C")</td>
+                                        <td>@donation.DATE?.ToShortDateString()</td>
+                                        <td>
+                                            @if (donation.Disaster != null)
+                                            {
+                                                <span class="badge badge-info">@donation.Disaster.DisasterName</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">General</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goods Donations -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Goods Donations</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Donor</th>
+                                    <th>Username</th>
+                                    <th>Items</th>
+                                    <th>Category</th>
+                                    <th>Description</th>
+                                    <th>Date</th>
+                                    <th>Disaster</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var donation in Model.GoodsDonations)
+                                {
+                                    <tr>
+                                        <td>@(string.IsNullOrEmpty(donation.DONOR) ? "Anonymous" : donation.DONOR)</td>
+                                        <td>@donation.USERNAME</td>
+                                        <td>@donation.ITEM_COUNT</td>
+                                        <td>@donation.CATEGORY</td>
+                                        <td>@donation.DESCRIPTION</td>
+                                        <td>@donation.DATE.ToShortDateString()</td>
+                                        <td>
+                                            @if (donation.Disaster != null)
+                                            {
+                                                <span class="badge badge-info">@donation.Disaster.DisasterName</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">General</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,60 +1,125 @@
-﻿@using Microsoft.AspNetCore.Identity
+<!DOCTYPE html>
+<html lang="en">
+@using Microsoft.AspNetCore.Identity
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gift of the Givers</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="/">
+                    <i class="fas fa-hands-helping"></i> Gift of the Givers
+                </a>
 
-<ul class="navbar-nav">
-    @if (SignInManager.IsSignedIn(User))
-    {
-        <li class="nav-item">
-            <span class="nav-link text-light">Welcome @UserManager.GetUserName(User)</span>
-        </li>
-        @if (User.IsInRole("Admin"))
-        {
-            <li class="nav-item">
-                <a class="nav-link text-light" asp-area="" asp-controller="GoodsDonations" asp-action="Index">Goods Donations</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-light" asp-area="" asp-controller="MoneyDonations" asp-action="Index">Money Donations</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-light" asp-area="" asp-controller="Disasters" asp-action="Index">Disasters</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-light" asp-area="" asp-controller="MoneyAllocations" asp-action="Index">Allocate money to disaster</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-light" asp-area="" asp-controller="GoodsAllocations" asp-action="Index">Allocate goods to disaster</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-light" asp-area="" asp-controller="GoodsPurchases" asp-action="Index">Purchase goods</a>
-            </li>
-        }
-        else
-        {
-            <li class="nav-item">
-                <a class="nav-link text-light" asp-area="" asp-controller="UserGoodsDonations" asp-action="Index">Goods Donations</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-light" asp-area="" asp-controller="UserMoneyDonations" asp-action="Index">Money Donations</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-light" asp-area="" asp-controller="UserDisasters" asp-action="Index">Disasters</a>
-            </li>
-        }
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-        <li class="nav-item">
-            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                <button type="submit" class="nav-link btn btn-link text-light">Logout</button>
-            </form>
-        </li>
-    }
-    else
-    {
-        <li class="nav-item">
-            <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Register">Register</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Login">Login</a>
-        </li>
-    }
-</ul>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-light" href="@Url.Action("Index", "Home")">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" href="@Url.Action("About", "Home")">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" href="@Url.Action("Contact", "Home")">Contact</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" href="@Url.Action("News", "Home")">News</a>
+                        </li>
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" href="@Url.Action("Dashboard", "Admin")">Admin Dashboard</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" href="@Url.Action("Index", "Disasters")">Manage Disasters</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" href="@Url.Action("Index", "GoodsDonations")">All Goods Donations</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" href="@Url.Action("Index", "MoneyDonations")">All Money Donations</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" href="@Url.Action("Index", "AdminVolunteer")">Volunteer Management</a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" href="@Url.Action("Index", "UserDisasters")">My Disasters</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" href="@Url.Action("Index", "UserGoodsDonations")">My Goods Donations</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" href="@Url.Action("Index", "UserMoneyDonations")">My Money Donations</a>
+                                </li>
+                            }
+                        }
+                    </ul>
+
+                    <ul class="navbar-nav">
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <li class="nav-item">
+                                <span class="navbar-text text-light">Welcome, @UserManager.GetUserName(User)!</span>
+                            </li>
+                            <li class="nav-item">
+                                <form class="d-inline" method="post" asp-area="Identity" asp-page="/Account/Logout">
+                                    <button type="submit" class="btn btn-link nav-link text-light">Logout</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Register">Register</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Login">Login</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main" class="pb-3">
+        @RenderBody()
+    </main>
+
+    <footer class="border-top footer text-muted bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p>&copy; 2024 - Gift of the Givers Foundation</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p>Bringing hope to those in need</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

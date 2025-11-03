@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -14,6 +14,19 @@ namespace ST10174327_GiftOfTheGiversWebApp.Models
         /// </summary>
         [Key]
         public int GoodsAllocationId { get; set; }
+
+        /// <summary>
+        /// Foreign key reference to a disaster.
+        /// </summary>
+        [Required(ErrorMessage = "Disaster is required")]
+        [Display(Name = "Disaster")]
+        public int DISASTER_ID { get; set; }
+
+        /// <summary>
+        /// Navigation property to Disaster.
+        /// </summary>
+        [ForeignKey("DISASTER_ID")]
+        public virtual Disaster? Disaster { get; set; }
 
         /// <summary>
         /// Number of items allocated.
@@ -42,12 +55,15 @@ namespace ST10174327_GiftOfTheGiversWebApp.Models
         public string? AidType { get; set; }
 
         /// <summary>
-        /// Foreign key reference to a disaster (not mapped to DB).
+        /// Foreign key reference to GoodsInventory (optional).
         /// </summary>
-        [NotMapped]
-        public int DisasterId { get; set; }
+        [Display(Name = "Goods Inventory")]
+        public int? GOODSINVENTORY_ID { get; set; }
 
-        // Optional: Navigation property to Disaster if you want a relationship
-        // public virtual Disaster? Disaster { get; set; }
+        /// <summary>
+        /// Navigation property to GoodsInventory.
+        /// </summary>
+        [ForeignKey("GOODSINVENTORY_ID")]
+        public virtual GoodsInventory? GoodsInventory { get; set; }
     }
 }

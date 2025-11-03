@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ST10174327_GiftOfTheGiversWebApp.Models
 {
@@ -26,5 +27,15 @@ namespace ST10174327_GiftOfTheGiversWebApp.Models
         [Required]
         [Range(0, int.MaxValue, ErrorMessage = "Item count cannot be negative.")]
         public int ITEM_COUNT { get; set; } = 0;
+
+        /// <summary>
+        /// Navigation property for goods allocations related to this inventory.
+        /// </summary>
+        public virtual ICollection<GoodsAllocation>? GoodsAllocations { get; set; }
+
+        /// <summary>
+        /// Navigation property for goods purchases related to this inventory.
+        /// </summary>
+        public virtual ICollection<GoodsPurchase>? GoodsPurchases { get; set; }
     }
 }

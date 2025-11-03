@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ST10174327_GiftOfTheGiversWebApp.Models
 {
@@ -42,5 +43,17 @@ namespace ST10174327_GiftOfTheGiversWebApp.Models
         /// </summary>
         [Display(Name = "Donor")]
         public string? DONOR { get; set; }
+
+        /// <summary>
+        /// Foreign key reference to a disaster (optional).
+        /// </summary>
+        [Display(Name = "Disaster")]
+        public int? DISASTER_ID { get; set; }
+
+        /// <summary>
+        /// Navigation property to Disaster.
+        /// </summary>
+        [ForeignKey("DISASTER_ID")]
+        public virtual Disaster? Disaster { get; set; }
     }
 }

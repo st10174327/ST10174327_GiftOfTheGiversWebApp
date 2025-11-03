@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -83,5 +83,25 @@ namespace ST10174327_GiftOfTheGiversWebApp.Models
         [Display(Name = "Description")]
         [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
         public string? Description { get; set; }
+
+        /// <summary>
+        /// Navigation property for money allocations related to this disaster.
+        /// </summary>
+        public virtual ICollection<MoneyAllocation>? MoneyAllocations { get; set; }
+
+        /// <summary>
+        /// Navigation property for goods allocations related to this disaster.
+        /// </summary>
+        public virtual ICollection<GoodsAllocation>? GoodsAllocations { get; set; }
+
+        /// <summary>
+        /// Navigation property for money donations related to this disaster.
+        /// </summary>
+        public virtual ICollection<MoneyDonation>? MoneyDonations { get; set; }
+
+        /// <summary>
+        /// Navigation property for goods donations related to this disaster.
+        /// </summary>
+        public virtual ICollection<GoodsDonation>? GoodsDonations { get; set; }
     }
-}   
+}

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +27,8 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
                 return Problem("Entity set 'ApplicationDbContext.GoodsAllocation' is null.");
 
             var allocations = await _context.GoodsAllocation
-                .Include(g => g.DisasterId)
+                .Include(g => g.Disaster)
+                .Include(g => g.GoodsInventory)
                 .ToListAsync();
 
             return View(allocations);
@@ -84,6 +85,8 @@ namespace ST10174327_GiftOfTheGiversWebApp.Controllers
             goodsAllocation.CATEGORY = category;
             goodsAllocation.AidType = aidType;
             goodsAllocation.AllocationDate = DateTime.Now.Date;
+            goodsAllocation.DISASTER_ID = disaster.DISASTER_ID;
+            goodsAllocation.GOODSINVENTORY_ID = selectedGood.GOODS_INVENTORY_ID;
 
             _context.GoodsAllocation.Add(goodsAllocation);
             await _context.SaveChangesAsync();

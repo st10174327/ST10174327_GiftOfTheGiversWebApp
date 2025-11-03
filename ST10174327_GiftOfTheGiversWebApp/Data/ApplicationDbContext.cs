@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ST10174327_GiftOfTheGiversWebApp.Models;
@@ -31,10 +31,6 @@ namespace ST10174327_GiftOfTheGiversWebApp.Data
             // Fix precision for decimal properties
             modelBuilder.Entity<GoodsPurchase>()
                 .Property(g => g.GoodsPurchasePrice)
-                .HasPrecision(18, 2);
-
-            modelBuilder.Entity<GoodsPurchase>()
-                .Property(g => g.GoodsTotalPrice)
                 .HasPrecision(18, 2);
 
             modelBuilder.Entity<Money>()
@@ -72,6 +68,55 @@ namespace ST10174327_GiftOfTheGiversWebApp.Data
 
             // Explicitly fix typo: map to Disaster table
             modelBuilder.Entity<Disaster>().ToTable("Disaster");
+
+            // Configure relationships
+            modelBuilder.Entity<MoneyAllocation>()
+                .HasOne(ma => ma.Disaster)
+                .WithMany(d => d.MoneyAllocations)
+                .HasForeignKey(ma => ma.DISASTER_ID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<GoodsAllocation>()
+                .HasOne(ga => ga.Disaster)
+                .WithMany(d => d.GoodsAllocations)
+                .HasForeignKey(ga => ga.DISASTER_ID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<GoodsAllocation>()
+                .HasOne(ga => ga.GoodsInventory)
+                .WithMany(gi => gi.GoodsAllocations)
+                .HasForeignKey(ga => ga.GOODSINVENTORY_ID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MoneyDonation>()
+                .HasOne(md => md.Disaster)
+                .WithMany(d => d.MoneyDonations)
+                .HasForeignKey(md => md.DISASTER_ID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<GoodsDonation>()
+                .HasOne(gd => gd.Disaster)
+                .WithMany(d => d.GoodsDonations)
+                .HasForeignKey(gd => gd.DISASTER_ID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<GoodsPurchase>()
+                .HasOne(gp => gp.GoodsInventory)
+                .WithMany(gi => gi.GoodsPurchases)
+                .HasForeignKey(gp => gp.GOODSINVENTORY_ID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TaskAssignment>()
+                .HasOne(ta => ta.Volunteer)
+                .WithMany(v => v.Tasks)
+                .HasForeignKey(ta => ta.VolunteerID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<TaskAssignment>()
+                .HasOne(ta => ta.VolunteerTask)
+                .WithMany()
+                .HasForeignKey(ta => ta.TaskID)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
-} 
+}

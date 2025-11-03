@@ -1,4 +1,4 @@
-﻿using ST10174327_GiftOfTheGiversWebApp.Models;
+using ST10174327_GiftOfTheGiversWebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using ST10174327_GiftOfTheGiversWebApp.Data;

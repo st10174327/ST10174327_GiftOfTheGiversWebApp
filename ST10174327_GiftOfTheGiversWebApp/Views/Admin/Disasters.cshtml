@@ -1,0 +1,98 @@
+@model List<ST10174327_GiftOfTheGiversWebApp.Models.Disaster>
+
+@{
+    ViewData["Title"] = "Manage Disasters";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Manage Disasters</h1>
+                <a href="@Url.Action("Create", "Disasters")" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Report New Disaster
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Disaster Name</th>
+                            <th>Location</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Aid Type</th>
+                            <th>Status</th>
+                            <th>Reported By</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var disaster in Model)
+                        {
+                            <tr>
+                                <td>@disaster.DisasterName</td>
+                                <td>@disaster.LOCATION</td>
+                                <td>@disaster.STARTDATE.ToShortDateString()</td>
+                                <td>@disaster.ENDDATE.ToShortDateString()</td>
+                                <td>@disaster.AID_TYPE</td>
+                                <td>
+                                    @if (disaster.IsActive == 1)
+                                    {
+                                        <span class="badge badge-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Inactive</span>
+                                    }
+                                </td>
+                                <td>@disaster.USERNAME</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="@Url.Action("Details", "Disasters", new { id = disaster.DISASTER_ID })" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <a href="@Url.Action("Edit", "Disasters", new { id = disaster.DISASTER_ID })" class="btn btn-sm btn-warning">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <a href="@Url.Action("Delete", "Disasters", new { id = disaster.DISASTER_ID })" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#dataTable').DataTable({
+                "pageLength": 10,
+                "ordering": true,
+                "searching": true,
+                "paging": true
+            });
+        });
+    </script>
+}

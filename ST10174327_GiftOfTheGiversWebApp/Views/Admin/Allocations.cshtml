@@ -1,0 +1,116 @@
+@model ST10174327_GiftOfTheGiversWebApp.Models.ViewModels.AllocationsViewModel
+
+@{
+    ViewData["Title"] = "Manage Allocations";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Manage Allocations</h1>
+        </div>
+    </div>
+
+    <!-- Money Allocations -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Money Allocations</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Disaster</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Aid Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var allocation in Model.MoneyAllocations)
+                                {
+                                    <tr>
+                                        <td>
+                                            @if (allocation.Disaster != null)
+                                            {
+                                                @allocation.Disaster.DisasterName
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Unknown Disaster</span>
+                                            }
+                                        </td>
+                                        <td>@allocation.AllocationAmount.ToString("C")</td>
+                                        <td>@allocation.AllocationDate.ToShortDateString()</td>
+                                        <td>@allocation.AidType</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goods Allocations -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Goods Allocations</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Disaster</th>
+                                    <th>Items</th>
+                                    <th>Category</th>
+                                    <th>Inventory</th>
+                                    <th>Date</th>
+                                    <th>Aid Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var allocation in Model.GoodsAllocations)
+                                {
+                                    <tr>
+                                        <td>
+                                            @if (allocation.Disaster != null)
+                                            {
+                                                @allocation.Disaster.DisasterName
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Unknown Disaster</span>
+                                            }
+                                        </td>
+                                        <td>@allocation.ITEM_COUNT</td>
+                                        <td>@allocation.CATEGORY</td>
+                                        <td>
+                                            @if (allocation.GoodsInventory != null)
+                                            {
+                                                @allocation.GoodsInventory.CATEGORY
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">N/A</span>
+                                            }
+                                        </td>
+                                        <td>@allocation.AllocationDate?.ToShortDateString()</td>
+                                        <td>@allocation.AidType</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
